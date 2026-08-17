@@ -1,0 +1,44 @@
+@HotelListing.Api_HostAddress = http://localhost:5268
+
+### Get All Hotels
+GET {{HotelListing.Api_HostAddress}}/api/hotels
+Accept: application/json
+
+###
+
+### Get Hotel By ID
+GET {{HotelListing.Api_HostAddress}}/api/hotels/1
+Accept: application/json
+
+###
+
+### Create New Hotel
+POST {{HotelListing.Api_HostAddress}}/api/hotels
+Content-Type: application/json
+
+{
+  "name": "Grand Hyatt",
+  "address": "789 Sunset Blvd",
+  "rating": 4.9
+}
+
+###
+
+### Update Hotel
+PUT {{HotelListing.Api_HostAddress}}/api/hotels/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Grand Plaza Renovated",
+  "address": "123 Main St",
+  "rating": 4.9
+}
+
+###
+
+### Delete Hotel
+DELETE {{HotelListing.Api_HostAddress}}/api/hotels/1
+
+###
+
