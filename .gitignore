@@ -1,0 +1,38 @@
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+## .NET Core / C#
+bin/
+obj/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Ob]j/
+[Ll]og/
+[Ll]ogs/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## IDEs
+.vscode/
+.idea/
+*.swp
+*~
+
+## Local secrets / config overrides
+# appsettings.Development.json
