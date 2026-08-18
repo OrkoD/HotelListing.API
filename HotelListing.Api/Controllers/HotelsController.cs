@@ -1,12 +1,11 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using HotelListing.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Api.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class HotelsController(HotelListingDbContext context) : ControllerBase
 {
     [HttpGet]

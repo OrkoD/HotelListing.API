@@ -1,5 +1,54 @@
 @HotelListing.Api_HostAddress = http://localhost:5268
 
+###############################################
+# COUNTRIES ENDPOINTS
+###############################################
+
+### 1. Get All Countries
+GET {{HotelListing.Api_HostAddress}}/api/countries
+Accept: application/json
+
+###
+
+### 2. Get Country By ID
+GET {{HotelListing.Api_HostAddress}}/api/countries/1
+Accept: application/json
+
+###
+
+### 3. Create New Country
+POST {{HotelListing.Api_HostAddress}}/api/countries
+Content-Type: application/json
+
+{
+  "name": "Bahamas",
+  "shortName": "BS"
+}
+
+###
+
+### 4. Update Country
+PUT {{HotelListing.Api_HostAddress}}/api/countries/1
+Content-Type: application/json
+
+{
+  "countryId": 1,
+  "name": "Jamaica",
+  "shortName": "JM"
+}
+
+###
+
+### 5. Delete Country By ID
+DELETE {{HotelListing.Api_HostAddress}}/api/countries/1
+
+###
+
+
+###############################################
+# HOTELS ENDPOINTS
+###############################################
+
 ### 1. Get All Hotels
 GET {{HotelListing.Api_HostAddress}}/api/hotels
 Accept: application/json
@@ -20,7 +69,7 @@ Content-Type: application/json
   "name": "Grand Palladium Resort",
   "address": "Lucea, Hanover",
   "rating": 4.6,
-  "countryId": 3
+  "countryId": 1
 }
 
 ###
