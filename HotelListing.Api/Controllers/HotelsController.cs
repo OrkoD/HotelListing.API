@@ -1,25 +1,21 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using HotelListing.Api.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace HotelListing.Api;
+namespace HotelListing.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class HotelsController : ControllerBase
+public class HotelsController(HotelListingDbContext context) : ControllerBase
 {
-    private static readonly List<Hotel> Hotels = [
-        new Hotel { Id = 1, Name = "Grand Plaza", Address = "123 Main St", Rating = 4.5 },
-        new Hotel { Id = 2, Name = "Ocean View", Address = "456 Beach Rd", Rating = 4.8 },
-    ];
-
     [HttpGet]
-    public ActionResult<IEnumerable<Hotel>> GetAll() => Hotels;
+    public async Task<ActionResult<IEnumerable<Hotel>>> GetAll() => await context.Hotels.ToListAsync();
 
     [HttpGet("{id:int}")]
-    public ActionResult<Hotel> GetById(int id)
+    public async Task<ActionResult<Hotel>> GetById(int id)
     {
-        var hotel = Hotels.Find(h => h.Id == id);
+        var hotel = await context.Hotels.FindAsync(id);
 
         return hotel is null
             ? NotFound()
@@ -27,54 +23,44 @@ public class HotelsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Hotel> Add(Hotel hotel)
+    public async Task<ActionResult<Hotel>> Add(Hotel hotel)
     {
-        if (Hotels.Exists(h => h.Id == hotel.Id))
-        {
-            return Conflict($"Hotel with ID {hotel.Id} already exists.");
-        }
-
-        hotel.Id = hotel.Id != 0
-            ? hotel.Id
-            : Hotels.Count == 0 ? 1 : Hotels.Max(h => h.Id) + 1;
-
-        Hotels.Add(hotel);
+        await context.Hotels.AddAsync(hotel);
+        await context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = hotel.Id }, hotel);
     }
 
     [HttpPut("{id:int}")]
-    public IActionResult Update(int id, Hotel hotel)
+    public async Task<IActionResult> Update(int id, Hotel hotel)
     {
         if (id != hotel.Id)
         {
             return BadRequest("The route ID and hotel ID must match.");
         }
 
-        var index = Hotels.FindIndex(h => h.Id == id);
+        var existingHotel = await context.Hotels.FindAsync(id);
 
-        if (index == -1)
+        if (existingHotel is null)
         {
             return NotFound();
         }
 
-        Hotels[index] = hotel;
+        context.Entry(existingHotel).CurrentValues.SetValues(hotel);
+        await context.SaveChangesAsync();
 
         return NoContent();
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var hotel = Hotels.Find(h => h.Id == id);
+        var deleted = await context.Hotels
+            .Where(h => h.Id == id)
+            .ExecuteDeleteAsync();
 
-        if (hotel is null)
-        {
-            return NotFound();
-        }
-
-        Hotels.Remove(hotel);
-
-        return NoContent();
+        return deleted > 0
+            ? NoContent()
+            : NotFound();
     }
 }
