@@ -34,21 +34,17 @@ public class CountriesController(HotelListingDbContext context) : ControllerBase
     public async Task<IActionResult> Update(int id, Country country)
     {
         if (id != country.CountryId)
-        {
             return BadRequest("The route ID and country ID must match.");
-        }
 
-        var existingCountry = await context.Countries.FindAsync(id);
+        var updated = await context.Countries
+                .Where(c => c.CountryId == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(c => c.Name, country.Name)
+                    .SetProperty(c => c.ShortName, country.ShortName));
 
-        if (existingCountry is null)
-        {
-            return NotFound();
-        }
-
-        context.Entry(existingCountry).CurrentValues.SetValues(country);
-        await context.SaveChangesAsync();
-
-        return NoContent();
+        return updated > 0
+            ? NoContent()
+            : NotFound();
     }
 
     [HttpDelete("{id:int}")]

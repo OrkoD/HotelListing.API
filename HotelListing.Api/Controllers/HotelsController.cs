@@ -34,22 +34,41 @@ public class HotelsController(HotelListingDbContext context) : ControllerBase
     public async Task<IActionResult> Update(int id, Hotel hotel)
     {
         if (id != hotel.Id)
-        {
             return BadRequest("The route ID and hotel ID must match.");
-        }
 
-        var existingHotel = await context.Hotels.FindAsync(id);
+        var updated = await context.Hotels
+                .Where(h => h.Id == id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(h => h.Name, hotel.Name)
+                    .SetProperty(h => h.Address, hotel.Address)
+                    .SetProperty(h => h.Rating, hotel.Rating)
+                    .SetProperty(h => h.CountryId, hotel.CountryId));
 
-        if (existingHotel is null)
-        {
-            return NotFound();
-        }
-
-        context.Entry(existingHotel).CurrentValues.SetValues(hotel);
-        await context.SaveChangesAsync();
-
-        return NoContent();
+        return updated > 0
+            ? NoContent()
+            : NotFound();
     }
+
+    // [HttpPut("{id:int}")]
+    // public async Task<IActionResult> Update(int id, Hotel hotel)
+    // {
+    //     if (id != hotel.Id)
+    //     {
+    //         return BadRequest("The route ID and hotel ID must match.");
+    //     }
+
+    //     var existingHotel = await context.Hotels.FindAsync(id);
+
+    //     if (existingHotel is null)
+    //     {
+    //         return NotFound();
+    //     }
+
+    //     context.Entry(existingHotel).CurrentValues.SetValues(hotel);
+    //     await context.SaveChangesAsync();
+
+    //     return NoContent();
+    // }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
