@@ -56,7 +56,7 @@ Accept: application/json
 ###
 
 ### 2. Get Hotel By ID
-GET {{HotelListing.Api_HostAddress}}/api/hotels/1
+GET {{HotelListing.Api_HostAddress}}/api/hotels/5
 Accept: application/json
 
 ###

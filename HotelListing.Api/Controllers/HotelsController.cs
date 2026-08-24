@@ -9,12 +9,15 @@ namespace HotelListing.Api.Controllers;
 public class HotelsController(HotelListingDbContext context) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Hotel>>> GetAll() => await context.Hotels.ToListAsync();
+    public async Task<ActionResult<IEnumerable<Hotel>>> GetAll() =>
+        await context.Hotels.ToListAsync();
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Hotel>> GetById(int id)
     {
-        var hotel = await context.Hotels.FindAsync(id);
+        var hotel = await context.Hotels
+            .Include(h => h.Country)
+            .SingleOrDefaultAsync(h => h.Id == id);
 
         return hotel is null
             ? NotFound()
