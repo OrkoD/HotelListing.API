@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using HotelListing.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using HotelListing.Api.DTOs.Hotel;
 
 namespace HotelListing.Api.Controllers;
 
@@ -9,15 +10,18 @@ namespace HotelListing.Api.Controllers;
 public class HotelsController(HotelListingDbContext context) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Hotel>>> GetAll() =>
-        await context.Hotels.ToListAsync();
+    public async Task<ActionResult<IEnumerable<GetHotelsDto>>> GetAll() =>
+        await context.Hotels
+            .Select(h => new GetHotelsDto(h.Id, h.Name, h.Address, h.Rating, h.CountryId))
+            .ToListAsync();
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Hotel>> GetById(int id)
+    public async Task<ActionResult<GetHotelDto>> GetById(int id)
     {
         var hotel = await context.Hotels
-            .Include(h => h.Country)
-            .SingleOrDefaultAsync(h => h.Id == id);
+            .Where(h => h.Id == id)
+            .Select(h => new GetHotelDto(h.Id, h.Name, h.Address, h.Rating, h.Country!.ShortName))
+            .SingleOrDefaultAsync();
 
         return hotel is null
             ? NotFound()
@@ -25,16 +29,35 @@ public class HotelsController(HotelListingDbContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Hotel>> Add(Hotel hotel)
+    public async Task<ActionResult<GetHotelDto>> Add(CreateHotelDto hotelDto)
     {
+        var country = await context.Countries.FindAsync(hotelDto.CountryId);
+        if (country is null)
+            return BadRequest("Invalid CountryId.");
+
+        var hotel = new Hotel
+        {
+            Name = hotelDto.Name,
+            Address = hotelDto.Address,
+            Rating = hotelDto.Rating,
+            CountryId = hotelDto.CountryId
+        };
         await context.Hotels.AddAsync(hotel);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = hotel.Id }, hotel);
+        var resultDto = new GetHotelDto(
+            hotel.Id,
+            hotel.Name,
+            hotel.Address,
+            hotel.Rating,
+            country.ShortName
+        );
+
+        return CreatedAtAction(nameof(GetById), new { id = resultDto.Id }, resultDto);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, Hotel hotel)
+    public async Task<IActionResult> Update(int id, UpdateHotelDto hotel)
     {
         if (id != hotel.Id)
             return BadRequest("The route ID and hotel ID must match.");
@@ -51,27 +74,6 @@ public class HotelsController(HotelListingDbContext context) : ControllerBase
             ? NoContent()
             : NotFound();
     }
-
-    // [HttpPut("{id:int}")]
-    // public async Task<IActionResult> Update(int id, Hotel hotel)
-    // {
-    //     if (id != hotel.Id)
-    //     {
-    //         return BadRequest("The route ID and hotel ID must match.");
-    //     }
-
-    //     var existingHotel = await context.Hotels.FindAsync(id);
-
-    //     if (existingHotel is null)
-    //     {
-    //         return NotFound();
-    //     }
-
-    //     context.Entry(existingHotel).CurrentValues.SetValues(hotel);
-    //     await context.SaveChangesAsync();
-
-    //     return NoContent();
-    // }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)

@@ -1,4 +1,6 @@
 using HotelListing.Api.Data;
+using HotelListing.Api.DTOs.Country;
+using HotelListing.Api.DTOs.Hotel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,15 +11,28 @@ namespace HotelListing.Api.Controllers;
 public class CountriesController(HotelListingDbContext context) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Country>>> GetAll() =>
-        await context.Countries.ToListAsync();
+    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetAll() =>
+        await context.Countries
+            .Select(c => new GetCountriesDto(c.CountryId, c.Name, c.ShortName))
+            .ToListAsync();
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Country>> GetById(int id)
+    public async Task<ActionResult<GetCountryDto>> GetById(int id)
     {
         var country = await context.Countries
-            .Include(c => c.Hotels)
-            .SingleOrDefaultAsync(c => c.CountryId == id);
+            .Where(c => c.CountryId == id)
+            .Select(c => new GetCountryDto(
+                c.CountryId,
+                c.Name,
+                c.ShortName,
+                c.Hotels.Select(h => new GetHotelSlimDto(
+                    h.Id,
+                    h.Name,
+                    h.Address,
+                    h.Rating
+                )).ToList()
+            ))
+            .SingleOrDefaultAsync();
 
         return country is null
             ? NotFound()
@@ -25,18 +40,30 @@ public class CountriesController(HotelListingDbContext context) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Country>> Add(Country country)
+    public async Task<ActionResult<GetCountryDto>> Add(CreateCountryDto countryDto)
     {
+        var country = new Country
+        {
+            Name = countryDto.Name,
+            ShortName = countryDto.ShortName
+        };
         await context.Countries.AddAsync(country);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = country.CountryId }, country);
+        var resultDto = new GetCountryDto(
+            country.CountryId,
+            country.Name,
+            country.ShortName,
+            []
+        );
+
+        return CreatedAtAction(nameof(GetById), new { id = resultDto.Id }, resultDto);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, Country country)
+    public async Task<IActionResult> Update(int id, UpdateCountryDto country)
     {
-        if (id != country.CountryId)
+        if (id != country.Id)
             return BadRequest("The route ID and country ID must match.");
 
         var updated = await context.Countries
