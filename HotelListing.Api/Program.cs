@@ -1,5 +1,7 @@
 using HotelListing.Api.Data;
+using HotelListing.Api.Contracts;
 using Microsoft.EntityFrameworkCore;
+using HotelListing.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<HotelListingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
+
+builder.Services.AddScoped<ICountriesService, CountriesService>();
 
 var app = builder.Build();
 

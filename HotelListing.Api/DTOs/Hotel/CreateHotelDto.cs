@@ -16,7 +16,6 @@ public class CreateHotelDto
     public double Rating { get; set; }
 
     [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "Please select a valid country"))]
     [Range(1, int.MaxValue, ErrorMessage = "Please select a valid country")]
     public int CountryId { get; set; }
 }
