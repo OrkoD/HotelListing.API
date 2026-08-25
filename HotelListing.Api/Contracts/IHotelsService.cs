@@ -1,16 +1,17 @@
 using HotelListing.Api.DTOs.Hotel;
+using HotelListing.Api.Results;
 
 namespace HotelListing.Api.Contracts;
 
 public interface IHotelsService
 {
-    Task<IEnumerable<GetHotelDto>> GetHotelsAsync();
+    Task<Result<IEnumerable<GetHotelDto>>> GetHotelsAsync();
 
-    Task<GetHotelDto?> GetHotelAsync(int id);
+    Task<Result<GetHotelDto>> GetHotelAsync(int id);
 
-    Task<GetHotelDto> CreateHotelAsync(CreateHotelDto hotelDto);
+    Task<Result<GetHotelDto>> CreateHotelAsync(CreateHotelDto hotelDto);
 
-    Task<bool> UpdateHotelAsync(int id, UpdateHotelDto hotel);
+    Task<Result> UpdateHotelAsync(int id, UpdateHotelDto hotel);
 
-    Task<bool> DeleteHotelAsync(int id);
+    Task<Result> DeleteHotelAsync(int id);
 }
