@@ -1,3 +1,4 @@
+using HotelListing.Api.Constants;
 using HotelListing.Api.Results;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,10 +25,10 @@ public abstract class ApiControllerBase : ControllerBase
 
         return error.Code switch
         {
-            "NotFound" => NotFound(error.Description),        // 404
-            "BadRequest" => BadRequest(error.Description),    // 400
-            "Validation" => BadRequest(error.Description),    // 400
-            "Conflict" => Conflict(error.Description),        // 409
+            ErrorCodes.NotFound => NotFound(error.Description),        // 404
+            ErrorCodes.BadRequest => BadRequest(error.Description),    // 400
+            ErrorCodes.Validation => BadRequest(error.Description),    // 400
+            ErrorCodes.Conflict => Conflict(error.Description),        // 409
             _ => Problem(detail: string.Join("; ", errors.Select(e => e.Description)), title: error.Code)
         };
     }

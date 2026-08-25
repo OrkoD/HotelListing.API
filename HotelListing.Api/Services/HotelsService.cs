@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using HotelListing.Api.Constants;
 using HotelListing.Api.Contracts;
 using HotelListing.Api.Data;
 using HotelListing.Api.DTOs.Hotel;
@@ -53,7 +54,7 @@ public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHot
     public async Task<Result> UpdateHotelAsync(int id, UpdateHotelDto hotel)
     {
         if (id != hotel.Id)
-            return Result.BadRequest(new Error("Validation", "Id route value doesn't match payload Id."));
+            return Result.BadRequest(new Error(ErrorCodes.Validation, "Id route value doesn't match payload Id."));
 
         var updated = await context.Hotels
             .Where(h => h.Id == id)
@@ -65,7 +66,7 @@ public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHot
 
         return updated
             ? Result.Success()
-            : Result.NotFound(new Error("NotFound", $"Hotel with id '{id}' was not found."));
+            : Result.NotFound($"Hotel with id '{id}' was not found.");
     }
 
     public async Task<Result> DeleteHotelAsync(int id)
@@ -76,6 +77,6 @@ public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHot
 
         return deleted
             ? Result.Success()
-            : Result.NotFound(new Error("NotFound", $"Hotel with id '{id}' was not found."));
+            : Result.NotFound($"Hotel with id '{id}' was not found.");
     }
 }

@@ -1,3 +1,5 @@
+using HotelListing.Api.Constants;
+
 namespace HotelListing.Api.Results;
 
 public readonly record struct Error(string Code, string Description)
@@ -22,7 +24,8 @@ public readonly record struct Result
 
     public static Result BadRequest(params Error[] errors) => new(false, errors);
 
-    public static Result NotFound(params Error[] errors) => new(false, []);
+    public static Result NotFound(string description = "Resource was not found.") =>
+        new(false, [new Error(ErrorCodes.NotFound, description)]);
 
     public static Result Combine(params Result[] results) =>
         results.Any(r => !r.IsSuccess)
@@ -47,7 +50,8 @@ public readonly record struct Result<T>
 
     public static Result<T> BadRequest(params Error[] errors) => new(false, default, errors);
 
-    public static Result<T> NotFound() => new(false, default, []);
+    public static Result<T> NotFound(string description = "Resource was not found.") =>
+        new(false, default, [new Error(ErrorCodes.NotFound, description)]);
 
     // Functional helpers
     public Result<K> Map<K>(Func<T, K> map) =>

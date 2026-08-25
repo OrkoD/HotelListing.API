@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using HotelListing.Api.Constants;
 using HotelListing.Api.Contracts;
 using HotelListing.Api.Data;
 using HotelListing.Api.DTOs.Country;
@@ -38,7 +39,7 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
             var exists = await CountryExistsAsync(countryDto.Name);
 
             if (exists)
-                return Result<GetCountryDto>.Failure(new Error("Conflict", $"Country with name '{countryDto.Name}' already exists"));
+                return Result<GetCountryDto>.Failure(new Error(ErrorCodes.Conflict, $"Country with name '{countryDto.Name}' already exists"));
 
             var country = mapper.Map<Country>(countryDto);
 
@@ -58,11 +59,11 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
     public async Task<Result> UpdateCountryAsync(int id, UpdateCountryDto country)
     {
         if (id != country.Id)
-            return Result.BadRequest(new Error("Validation", "Id route value doesn't match payload Id."));
+            return Result.BadRequest(new Error(ErrorCodes.Validation, "Id route value doesn't match payload Id."));
 
         var duplicateName = await CountryExistsAsync(country.Name, id);
         if (duplicateName)
-            return Result.Failure(new Error("Conflict", $"Country with name '{country.Name}' already exists."));
+            return Result.Failure(new Error(ErrorCodes.Conflict, $"Country with name '{country.Name}' already exists."));
 
         var updated = await context.Countries
             .Where(c => c.CountryId == id)
@@ -72,7 +73,7 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
 
         return updated > 0
             ? Result.Success()
-            : Result.NotFound(new Error("NotFound", $"Country with id '{id}' was not found."));
+            : Result.NotFound($"Country with id '{id}' was not found.");
     }
 
     // public async Task<Result> UpdateCountryAsync(int id, UpdateCountryDto updateDto)
@@ -114,7 +115,7 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
 
         return deleted > 0
             ? Result.Success()
-            : Result.NotFound(new Error("NotFound", $"Country with id '{id}' was not found."));
+            : Result.NotFound($"Country with id '{id}' was not found.");
     }
 
     public async Task<bool> CountryExistsAsync(string name, int? excludeId = null) =>
