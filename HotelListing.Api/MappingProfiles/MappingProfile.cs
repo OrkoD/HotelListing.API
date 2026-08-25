@@ -15,6 +15,7 @@ public class HotelMappingProfile : Profile
                 cfg => cfg.MapFrom(s => s.Country != null ? s.Country.Name : string.Empty)
             );
         CreateMap<CreateHotelDto, Hotel>();
+        CreateMap<Hotel, GetHotelSlimDto>();
     }
 }
 
@@ -22,8 +23,10 @@ public class CountryMappingProfile : Profile
 {
     public CountryMappingProfile()
     {
-        CreateMap<Country, GetCountryDto>();
-        CreateMap<Country, GetCountriesDto>();
+        CreateMap<Country, GetCountryDto>()
+            .ForCtorParam(nameof(GetCountryDto.Id), cfg => cfg.MapFrom(s => s.CountryId));
+        CreateMap<Country, GetCountriesDto>()
+            .ForCtorParam(nameof(GetCountriesDto.Id), cfg => cfg.MapFrom(s => s.CountryId));
         CreateMap<CreateCountryDto, Country>();
     }
 }

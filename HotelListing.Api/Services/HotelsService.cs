@@ -11,14 +11,12 @@ public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHot
 {
     public async Task<IEnumerable<GetHotelDto>> GetHotelsAsync() =>
         await context.Hotels
-            .Include(h => h.Country)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
     public async Task<GetHotelDto?> GetHotelAsync(int id) =>
         await context.Hotels
             .Where(h => h.Id == id)
-            .Include(h => h.Country)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
 

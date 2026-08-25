@@ -1,6 +1,7 @@
 using HotelListing.Api.DTOs.Country;
 using HotelListing.Api.Contracts;
 using Microsoft.AspNetCore.Mvc;
+using HotelListing.Api.Results;
 
 namespace HotelListing.Api.Controllers;
 
@@ -10,40 +11,56 @@ public class CountriesController(ICountriesService countriesService) : Controlle
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries() =>
-         Ok(await countriesService.GetCountriesAsync());
+        ToActionResult(await countriesService.GetCountriesAsync());
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<GetCountryDto>> GetCountry(int id)
-    {
-        var country = await countriesService.GetCountryAsync(id);
-
-        return country is null
-            ? NotFound()
-            : country;
-    }
+    public async Task<ActionResult<GetCountryDto>> GetCountry(int id) =>
+        ToActionResult(await countriesService.GetCountryAsync(id));
 
     [HttpPost]
     public async Task<ActionResult<GetCountryDto>> CreateCountry(CreateCountryDto countryDto)
     {
-        var resultDto = await countriesService.CreateCountryAsync(countryDto);
+        var result = await countriesService.CreateCountryAsync(countryDto);
 
-        return CreatedAtAction(nameof(GetCountry), new { id = resultDto.Id }, resultDto);
+        if (!result.IsSuccess)
+            return MapErrorsToResponse(result.Errors);
+
+        return CreatedAtAction(nameof(GetCountry), new { id = result.Value!.Id }, result.Value);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateCountry(int id, UpdateCountryDto country)
-    {
-        if (id != country.Id)
-            return BadRequest("The route ID and country ID must match.");
-
-        return await countriesService.UpdateCountryAsync(id, country)
-            ? NoContent()
-            : NotFound();
-    }
+    public async Task<IActionResult> UpdateCountry(int id, UpdateCountryDto country) =>
+        ToActionResult(await countriesService.UpdateCountryAsync(id, country));
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteCountry(int id) =>
-        await countriesService.DeleteCountryAsync(id)
+        ToActionResult(await countriesService.DeleteCountryAsync(id));
+
+    // Helpers
+    private ActionResult<T> ToActionResult<T>(Result<T> result) =>
+        result.IsSuccess
+            ? Ok(result.Value)
+            : MapErrorsToResponse(result.Errors);
+
+    private ActionResult ToActionResult(Result result) =>
+        result.IsSuccess
             ? NoContent()
-            : NotFound();
+            : MapErrorsToResponse(result.Errors);
+
+    private ActionResult MapErrorsToResponse(Error[] errors)
+    {
+        if (errors is null || errors.Length == 0)
+            return Problem();
+
+        var error = errors.FirstOrDefault();
+
+        return error.Code switch
+        {
+            "NotFound" => NotFound(error.Description),        // 404
+            "BadRequest" => BadRequest(error.Description),    // 400
+            "Validation" => BadRequest(error.Description),    // 400
+            "Conflict" => Conflict(error.Description),        // 409
+            _ => Problem(detail: string.Join("; ", errors.Select(e => e.Description)), title: error.Code)
+        };
+    }
 }
