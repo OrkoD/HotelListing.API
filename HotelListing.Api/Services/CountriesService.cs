@@ -76,37 +76,6 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
             : Result.NotFound($"Country with id '{id}' was not found.");
     }
 
-    // public async Task<Result> UpdateCountryAsync(int id, UpdateCountryDto updateDto)
-    // {
-    //     try
-    //     {
-    //         if (id != updateDto.Id)
-    //             return Result.BadRequest(new Error("Validation", "Id route value doesn't match payload Id."));
-
-    //         var country = await context.Countries.FindAsync(id);
-
-    //         if (country is null)
-    //             return Result.NotFound(new Error("NotFound", $"Country '{id}' was not found."));
-
-    //         var duplicateName = await CountryExistsAsync(updateDto.Name);
-
-    //         if (duplicateName)
-    //             return Result.Failure(new Error("Conflict", $"Country with name '{updateDto.Name}' already exists."));
-
-    //         country.Name = updateDto.Name;
-    //         country.ShortName = updateDto.ShortName;
-
-    //         context.Countries.Update(country);
-    //         await context.SaveChangesAsync();
-
-    //         return Result.Success();
-    //     }
-    //     catch (Exception)
-    //     {
-    //         return Result.Failure();
-    //     }
-    // }
-
     public async Task<Result> DeleteCountryAsync(int id)
     {
         var deleted = await context.Countries
@@ -117,6 +86,9 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
             ? Result.Success()
             : Result.NotFound($"Country with id '{id}' was not found.");
     }
+
+    public async Task<bool> CountryExistsAsync(int id) =>
+        await context.Countries.AnyAsync(c => c.CountryId == id);
 
     public async Task<bool> CountryExistsAsync(string name, int? excludeId = null) =>
         await context.Countries.AnyAsync(c =>

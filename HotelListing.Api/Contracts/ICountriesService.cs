@@ -15,5 +15,7 @@ public interface ICountriesService
 
     Task<Result> DeleteCountryAsync(int id);
 
+    Task<bool> CountryExistsAsync(int id);
+
     Task<bool> CountryExistsAsync(string name, int? excludeId = null);
 }

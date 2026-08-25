@@ -9,7 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Api.Services;
 
-public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHotelsService
+public class HotelsService(
+    HotelListingDbContext context,
+    ICountriesService countriesService,
+    IMapper mapper) : IHotelsService
 {
     public async Task<Result<IEnumerable<GetHotelDto>>> GetHotelsAsync()
     {
@@ -28,33 +31,42 @@ public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHot
             .SingleOrDefaultAsync();
 
         return hotel is null
-            ? Result<GetHotelDto>.NotFound()
+            ? Result<GetHotelDto>.NotFound($"Hotel '{id}' was not found.")
             : Result<GetHotelDto>.Success(hotel);
     }
 
     public async Task<Result<GetHotelDto>> CreateHotelAsync(CreateHotelDto hotelDto)
     {
-        try
-        {
-            var hotel = mapper.Map<Hotel>(hotelDto);
+        var countryExists = await countriesService.CountryExistsAsync(hotelDto.CountryId);
 
-            await context.Hotels.AddAsync(hotel);
-            await context.SaveChangesAsync();
+        if (!countryExists)
+            return Result<GetHotelDto>.Failure(new Error(ErrorCodes.NotFound, $"Country '{hotelDto.CountryId}' was not found."));
 
-            var dto = mapper.Map<GetHotelDto>(hotel);
+        var duplicated = await HotelExistsAsync(hotelDto.Name, hotelDto.CountryId);
+        if (duplicated)
+            return Result<GetHotelDto>.Failure(new Error(ErrorCodes.Conflict, $"Hotel '{hotelDto.Name}' already exists in the selected country."));
 
-            return Result<GetHotelDto>.Success(dto);
-        }
-        catch (Exception)
-        {
-            return Result<GetHotelDto>.Failure();
-        }
+        var hotel = mapper.Map<Hotel>(hotelDto);
+        await context.Hotels.AddAsync(hotel);
+        await context.SaveChangesAsync();
+
+        var dto = await context.Hotels
+            .Where(h => h.Id == hotel.Id)
+            .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
+            .FirstAsync();
+
+        return Result<GetHotelDto>.Success(dto);
     }
 
     public async Task<Result> UpdateHotelAsync(int id, UpdateHotelDto hotel)
     {
         if (id != hotel.Id)
             return Result.BadRequest(new Error(ErrorCodes.Validation, "Id route value doesn't match payload Id."));
+
+        var countryExists = await countriesService.CountryExistsAsync(hotel.CountryId);
+
+        if (!countryExists)
+            return Result.Failure(new Error(ErrorCodes.NotFound, $"Country '{hotel.CountryId}' was not found."));
 
         var updated = await context.Hotels
             .Where(h => h.Id == id)
@@ -78,5 +90,10 @@ public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHot
         return deleted
             ? Result.Success()
             : Result.NotFound($"Hotel with id '{id}' was not found.");
+    }
+
+    public async Task<bool> HotelExistsAsync(string name, int countryId)
+    {
+        return await context.Hotels.AnyAsync(h => h.Name == name && h.CountryId == countryId);
     }
 }

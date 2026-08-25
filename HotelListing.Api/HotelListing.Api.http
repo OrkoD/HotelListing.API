@@ -75,14 +75,14 @@ Content-Type: application/json
 ###
 
 ### 4. Update Hotel
-PUT {{HotelListing.Api_HostAddress}}/api/hotels/1
+PUT {{HotelListing.Api_HostAddress}}/api/hotels/4
 Content-Type: application/json
 
 {
-  "id": 1,
-  "name": "Grand Palladium Lady Hamilton Resort & Spa",
-  "address": "Lucea, Hanover, Jamaica",
-  "rating": 4.8,
+  "id": 4,
+  "name": "Tarasivska Resort",
+  "address": "Tarasivska str",
+  "rating": 4.9,
   "countryId": 1
 }
 
