@@ -1,3 +1,5 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using HotelListing.Api.Contracts;
 using HotelListing.Api.Data;
 using HotelListing.Api.DTOs.Hotel;
@@ -5,41 +7,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Api.Services;
 
-public class HotelsService(HotelListingDbContext context) : IHotelsService
+public class HotelsService(HotelListingDbContext context, IMapper mapper) : IHotelsService
 {
     public async Task<IEnumerable<GetHotelDto>> GetHotelsAsync() =>
         await context.Hotels
-            .Select(h => new GetHotelDto(h.Id, h.Name, h.Address, h.Rating, h.CountryId, h.Country!.ShortName))
+            .Include(h => h.Country)
+            .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
     public async Task<GetHotelDto?> GetHotelAsync(int id) =>
         await context.Hotels
             .Where(h => h.Id == id)
-            .Select(h => new GetHotelDto(h.Id, h.Name, h.Address, h.Rating, h.CountryId, h.Country!.ShortName))
+            .Include(h => h.Country)
+            .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
 
     public async Task<GetHotelDto> CreateHotelAsync(CreateHotelDto hotelDto)
     {
-        var country = await context.Countries.FindAsync(hotelDto.CountryId);
+        var hotel = mapper.Map<Hotel>(hotelDto);
 
-        var hotel = new Hotel
-        {
-            Name = hotelDto.Name,
-            Address = hotelDto.Address,
-            Rating = hotelDto.Rating,
-            CountryId = hotelDto.CountryId
-        };
         await context.Hotels.AddAsync(hotel);
         await context.SaveChangesAsync();
 
-        return new GetHotelDto(
-            hotel.Id,
-            hotel.Name,
-            hotel.Address,
-            hotel.Rating,
-            hotel.CountryId,
-            country!.ShortName
-        );
+        return mapper.Map<GetHotelDto>(hotel);
     }
 
     public async Task<bool> UpdateHotelAsync(int id, UpdateHotelDto hotel) =>

@@ -1,0 +1,29 @@
+using AutoMapper;
+using HotelListing.Api.Data;
+using HotelListing.Api.DTOs.Country;
+using HotelListing.Api.DTOs.Hotel;
+
+namespace HotelListing.Api.MappingProfiles;
+
+public class HotelMappingProfile : Profile
+{
+    public HotelMappingProfile()
+    {
+        CreateMap<Hotel, GetHotelDto>()
+            .ForCtorParam(
+                nameof(GetHotelDto.Country),
+                cfg => cfg.MapFrom(s => s.Country != null ? s.Country.Name : string.Empty)
+            );
+        CreateMap<CreateHotelDto, Hotel>();
+    }
+}
+
+public class CountryMappingProfile : Profile
+{
+    public CountryMappingProfile()
+    {
+        CreateMap<Country, GetCountryDto>();
+        CreateMap<Country, GetCountriesDto>();
+        CreateMap<CreateCountryDto, Country>();
+    }
+}

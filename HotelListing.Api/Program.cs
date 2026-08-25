@@ -2,6 +2,7 @@ using HotelListing.Api.Data;
 using HotelListing.Api.Contracts;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Services;
+using HotelListing.Api.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,12 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
 builder.Services.AddOpenApi();
-
 builder.Services.AddDbContext<HotelListingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
-
 builder.Services.AddScoped<ICountriesService, CountriesService>();
 builder.Services.AddScoped<IHotelsService, HotelsService>();
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
 var app = builder.Build();
 
