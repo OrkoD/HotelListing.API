@@ -1,5 +1,5 @@
 @HotelListing.Api_HostAddress = http://localhost:5268
-@json = application/json;
+@json = application/json
 
 ###############################################
 # HOTELS ENDPOINTS
@@ -49,6 +49,7 @@ DELETE {{HotelListing.Api_HostAddress}}/api/hotels/1
 
 ###
 
+
 ###############################################
 # COUNTRIES ENDPOINTS
 ###############################################
@@ -95,24 +96,24 @@ DELETE {{HotelListing.Api_HostAddress}}/api/countries/1
 
 
 ###############################################
-# AUTH & IDENTITY ENDPOINTS
+# CUSTOM AUTH CONTROLLER ENDPOINTS (/api/auth)
 ###############################################
 
-@bearerToken = YOUR_ACCESS_TOKEN_HERE
-
-### 1. Register New User
+### 1. Register User (Custom AuthController)
 POST {{HotelListing.Api_HostAddress}}/api/auth/register
 Content-Type: {{json}}
 
 {
   "email": "user@example.com",
-  "password": "Password123!"
+  "password": "Password123!",
+  "firstName": "John",
+  "lastName": "Doe"
 }
 
 ###
 
-### 2. Login (Get Access & Refresh Token)
-POST {{HotelListing.Api_HostAddress}}/api/auth/login?useCookies=false
+### 2. Login User (Custom AuthController)
+POST {{HotelListing.Api_HostAddress}}/api/auth/login
 Content-Type: {{json}}
 
 {
@@ -122,8 +123,37 @@ Content-Type: {{json}}
 
 ###
 
-### 3. Refresh Token
-POST {{HotelListing.Api_HostAddress}}/api/auth/refresh
+
+###############################################
+# BUILT-IN IDENTITY ENDPOINTS (/api/default-auth)
+###############################################
+
+@bearerToken = YOUR_ACCESS_TOKEN_HERE
+
+### 1. Default Register
+POST {{HotelListing.Api_HostAddress}}/api/default-auth/register
+Content-Type: {{json}}
+
+{
+  "email": "defaultuser@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### 2. Default Login (Get Bearer & Refresh Token)
+POST {{HotelListing.Api_HostAddress}}/api/default-auth/login?useCookies=false
+Content-Type: {{json}}
+
+{
+  "email": "defaultuser@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### 3. Default Refresh Token
+POST {{HotelListing.Api_HostAddress}}/api/default-auth/refresh
 Content-Type: {{json}}
 
 {
@@ -132,15 +162,15 @@ Content-Type: {{json}}
 
 ###
 
-### 4. Get User Profile Info (Requires Auth)
-GET {{HotelListing.Api_HostAddress}}/api/auth/manage/info
+### 4. Default Get User Profile Info (Requires Auth)
+GET {{HotelListing.Api_HostAddress}}/api/default-auth/manage/info
 Accept: {{json}}
 Authorization: Bearer {{bearerToken}}
 
 ###
 
-### 5. Update User Email / Password (Requires Auth)
-POST {{HotelListing.Api_HostAddress}}/api/auth/manage/info
+### 5. Default Update User Email / Password (Requires Auth)
+POST {{HotelListing.Api_HostAddress}}/api/default-auth/manage/info
 Content-Type: {{json}}
 Authorization: Bearer {{bearerToken}}
 
@@ -152,22 +182,22 @@ Authorization: Bearer {{bearerToken}}
 
 ###
 
-### 6. Forgot Password
-POST {{HotelListing.Api_HostAddress}}/api/auth/forgotPassword
+### 6. Default Forgot Password
+POST {{HotelListing.Api_HostAddress}}/api/default-auth/forgotPassword
 Content-Type: {{json}}
 
 {
-  "email": "user@example.com"
+  "email": "defaultuser@example.com"
 }
 
 ###
 
-### 7. Resend Confirmation Email
-POST {{HotelListing.Api_HostAddress}}/api/auth/resendConfirmationEmail
+### 7. Default Resend Confirmation Email
+POST {{HotelListing.Api_HostAddress}}/api/default-auth/resendConfirmationEmail
 Content-Type: {{json}}
 
 {
-  "email": "user@example.com"
+  "email": "defaultuser@example.com"
 }
 
 ###

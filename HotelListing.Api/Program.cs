@@ -22,7 +22,7 @@ builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
 var app = builder.Build();
 
-app.MapGroup("api/auth").MapIdentityApi<ApplicationUser>();
+app.MapGroup("api/default-auth").MapIdentityApi<ApplicationUser>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
