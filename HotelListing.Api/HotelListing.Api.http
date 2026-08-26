@@ -1,49 +1,5 @@
 @HotelListing.Api_HostAddress = http://localhost:5268
-
-###############################################
-# COUNTRIES ENDPOINTS
-###############################################
-
-### 1. Get All Countries
-GET {{HotelListing.Api_HostAddress}}/api/countries
-Accept: application/json
-
-###
-
-### 2. Get Country By ID
-GET {{HotelListing.Api_HostAddress}}/api/countries/1
-Accept: application/json
-
-###
-
-### 3. Create New Country
-POST {{HotelListing.Api_HostAddress}}/api/countries
-Content-Type: application/json
-
-{
-  "name": "Bahamas",
-  "shortName": "BS"
-}
-
-###
-
-### 4. Update Country
-PUT {{HotelListing.Api_HostAddress}}/api/countries/1
-Content-Type: application/json
-
-{
-  "countryId": 1,
-  "name": "Jamaica",
-  "shortName": "JM"
-}
-
-###
-
-### 5. Delete Country By ID
-DELETE {{HotelListing.Api_HostAddress}}/api/countries/1
-
-###
-
+@json = application/json;
 
 ###############################################
 # HOTELS ENDPOINTS
@@ -51,19 +7,19 @@ DELETE {{HotelListing.Api_HostAddress}}/api/countries/1
 
 ### 1. Get All Hotels
 GET {{HotelListing.Api_HostAddress}}/api/hotels
-Accept: application/json
+Accept: {{json}}
 
 ###
 
 ### 2. Get Hotel By ID
 GET {{HotelListing.Api_HostAddress}}/api/hotels/5
-Accept: application/json
+Accept: {{json}}
 
 ###
 
 ### 3. Create New Hotel (Linked to CountryId: 1)
 POST {{HotelListing.Api_HostAddress}}/api/hotels
-Content-Type: application/json
+Content-Type: {{json}}
 
 {
   "name": "Grand Palladium Resort",
@@ -76,7 +32,7 @@ Content-Type: application/json
 
 ### 4. Update Hotel
 PUT {{HotelListing.Api_HostAddress}}/api/hotels/4
-Content-Type: application/json
+Content-Type: {{json}}
 
 {
   "id": 4,
@@ -90,5 +46,128 @@ Content-Type: application/json
 
 ### 5. Delete Hotel By ID
 DELETE {{HotelListing.Api_HostAddress}}/api/hotels/1
+
+###
+
+###############################################
+# COUNTRIES ENDPOINTS
+###############################################
+
+### 1. Get All Countries
+GET {{HotelListing.Api_HostAddress}}/api/countries
+Accept: {{json}}
+
+###
+
+### 2. Get Country By ID
+GET {{HotelListing.Api_HostAddress}}/api/countries/1
+Accept: {{json}}
+
+###
+
+### 3. Create New Country
+POST {{HotelListing.Api_HostAddress}}/api/countries
+Content-Type: {{json}}
+
+{
+  "name": "Bahamas",
+  "shortName": "BS"
+}
+
+###
+
+### 4. Update Country
+PUT {{HotelListing.Api_HostAddress}}/api/countries/1
+Content-Type: {{json}}
+
+{
+  "id": 1,
+  "name": "Jamaica",
+  "shortName": "JM"
+}
+
+###
+
+### 5. Delete Country By ID
+DELETE {{HotelListing.Api_HostAddress}}/api/countries/1
+
+###
+
+
+###############################################
+# AUTH & IDENTITY ENDPOINTS
+###############################################
+
+@bearerToken = YOUR_ACCESS_TOKEN_HERE
+
+### 1. Register New User
+POST {{HotelListing.Api_HostAddress}}/api/auth/register
+Content-Type: {{json}}
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### 2. Login (Get Access & Refresh Token)
+POST {{HotelListing.Api_HostAddress}}/api/auth/login?useCookies=false
+Content-Type: {{json}}
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### 3. Refresh Token
+POST {{HotelListing.Api_HostAddress}}/api/auth/refresh
+Content-Type: {{json}}
+
+{
+  "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+}
+
+###
+
+### 4. Get User Profile Info (Requires Auth)
+GET {{HotelListing.Api_HostAddress}}/api/auth/manage/info
+Accept: {{json}}
+Authorization: Bearer {{bearerToken}}
+
+###
+
+### 5. Update User Email / Password (Requires Auth)
+POST {{HotelListing.Api_HostAddress}}/api/auth/manage/info
+Content-Type: {{json}}
+Authorization: Bearer {{bearerToken}}
+
+{
+  "newEmail": "newuser@example.com",
+  "newPassword": "NewPassword123!",
+  "oldPassword": "Password123!"
+}
+
+###
+
+### 6. Forgot Password
+POST {{HotelListing.Api_HostAddress}}/api/auth/forgotPassword
+Content-Type: {{json}}
+
+{
+  "email": "user@example.com"
+}
+
+###
+
+### 7. Resend Confirmation Email
+POST {{HotelListing.Api_HostAddress}}/api/auth/resendConfirmationEmail
+Content-Type: {{json}}
+
+{
+  "email": "user@example.com"
+}
 
 ###

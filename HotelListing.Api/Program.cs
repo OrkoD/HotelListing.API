@@ -2,7 +2,7 @@ using HotelListing.Api.Data;
 using HotelListing.Api.Contracts;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Services;
-using HotelListing.Api.MappingProfiles;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +12,17 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<HotelListingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddEntityFrameworkStores<HotelListingDbContext>();
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<ICountriesService, CountriesService>();
 builder.Services.AddScoped<IHotelsService, HotelsService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
 var app = builder.Build();
+
+app.MapGroup("api/auth").MapIdentityApi<ApplicationUser>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
