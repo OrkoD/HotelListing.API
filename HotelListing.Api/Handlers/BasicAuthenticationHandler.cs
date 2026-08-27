@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using HotelListing.Api.Contracts;
 using HotelListing.Api.DTOs.Auth;
-using HotelListing.Api.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +12,6 @@ public class BasicAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    UsersService usersService
     IUsersService usersService
 )
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
