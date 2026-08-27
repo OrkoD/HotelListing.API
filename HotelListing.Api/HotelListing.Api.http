@@ -96,15 +96,15 @@ DELETE {{HotelListing.Api_HostAddress}}/api/countries/1
 
 
 ###############################################
-# CUSTOM AUTH CONTROLLER ENDPOINTS (/api/auth)
+# AUTH CONTROLLER ENDPOINTS (/api/auth)
 ###############################################
 
-### 1. Register User (Custom AuthController)
+### 1. Register User (Success)
 POST {{HotelListing.Api_HostAddress}}/api/auth/register
 Content-Type: {{json}}
 
 {
-  "email": "user@example.com",
+  "email": "john.doe@example.com",
   "password": "Password123!",
   "firstName": "John",
   "lastName": "Doe"
@@ -112,13 +112,37 @@ Content-Type: {{json}}
 
 ###
 
-### 2. Login User (Custom AuthController)
+### 2. Register User (Validation Error - Short Password)
+POST {{HotelListing.Api_HostAddress}}/api/auth/register
+Content-Type: {{json}}
+
+{
+  "email": "jane.doe@example.com",
+  "password": "short",
+  "firstName": "Jane",
+  "lastName": "Doe"
+}
+
+###
+
+### 3. Login User (Success)
 POST {{HotelListing.Api_HostAddress}}/api/auth/login
 Content-Type: {{json}}
 
 {
-  "email": "user@example.com",
+  "email": "john.doe@example.com",
   "password": "Password123!"
+}
+
+###
+
+### 4. Login User (Invalid Credentials)
+POST {{HotelListing.Api_HostAddress}}/api/auth/login
+Content-Type: {{json}}
+
+{
+  "email": "john.doe@example.com",
+  "password": "WrongPassword!"
 }
 
 ###
