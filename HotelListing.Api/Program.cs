@@ -18,15 +18,19 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<HotelListingDbContext>();
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = AuthenticationDefaults.BasicScheme;
-    options.DefaultChallengeScheme = AuthenticationDefaults.BasicScheme;
+    // options.DefaultAuthenticateScheme = AuthenticationDefaults.BasicScheme; // For Basic Scheme
+    // options.DefaultChallengeScheme = AuthenticationDefaults.BasicScheme;    // For Basic Scheme
+    options.DefaultAuthenticateScheme = AuthenticationDefaults.ApiKeyScheme;
+    options.DefaultChallengeScheme = AuthenticationDefaults.ApiKeyScheme;
 })
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(AuthenticationDefaults.BasicScheme, _ => { });
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(AuthenticationDefaults.BasicScheme, _ => { })
+    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(AuthenticationDefaults.ApiKeyScheme, _ => { });
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<ICountriesService, CountriesService>();
 builder.Services.AddScoped<IHotelsService, HotelsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
 var app = builder.Build();
