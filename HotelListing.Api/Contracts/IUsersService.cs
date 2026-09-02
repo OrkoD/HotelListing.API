@@ -1,3 +1,4 @@
+using HotelListing.Api.Data;
 using HotelListing.Api.DTOs.Auth;
 using HotelListing.Api.Results;
 

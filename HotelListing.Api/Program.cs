@@ -8,6 +8,7 @@ using HotelListing.Api.Handlers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<HotelListingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<HotelListingDbContext>();
 
 builder.Services.AddAuthentication(options =>
