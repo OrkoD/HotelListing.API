@@ -153,12 +153,64 @@ Content-Type: {{json}}
 
 ###
 
-### 5. Test Basic Authentication (Credentials: john.doe@example.com:Password123!)
+### 5. Test Country with JWT Token
 GET {{HotelListing.Api_HostAddress}}/api/countries
 Accept: {{json}}
-# X-Api-Key: {{apiKey}}
-# Authorization: Basic am9obi5kb2VAZXhhbXBsZS5jb206UGFzc3dvcmQxMjMh
 Authorization: {{jwtToken}}
+
+###
+
+
+###############################################
+# API KEY AUTHENTICATION ENDPOINTS (/api/apikey)
+###############################################
+
+### 1. Test API Key Auth (Success)
+GET {{HotelListing.Api_HostAddress}}/api/apikey
+Accept: {{json}}
+X-Api-Key: {{apiKey}}
+
+###
+
+### 2. Test API Key Secret Endpoint (Success)
+GET {{HotelListing.Api_HostAddress}}/api/apikey/secret
+Accept: {{json}}
+X-Api-Key: {{apiKey}}
+
+###
+
+### 3. Test API Key Auth (Failure - Invalid Key)
+GET {{HotelListing.Api_HostAddress}}/api/apikey
+Accept: {{json}}
+X-Api-Key: InvalidApiKey12345
+
+###
+
+
+###############################################
+# BASIC AUTHENTICATION ENDPOINTS (/api/basicauth)
+###############################################
+
+@basicAuthHeader = Basic am9obi5kb2VAZXhhbXBsZS5jb206UGFzc3dvcmQxMjMh
+
+### 1. Test Basic Auth (Success - john.doe@example.com:Password123!)
+GET {{HotelListing.Api_HostAddress}}/api/basicauth
+Accept: {{json}}
+Authorization: {{basicAuthHeader}}
+
+###
+
+### 2. Test Basic Auth Profile (Success)
+GET {{HotelListing.Api_HostAddress}}/api/basicauth/profile
+Accept: {{json}}
+Authorization: {{basicAuthHeader}}
+
+###
+
+### 3. Test Basic Auth (Failure - Invalid Credentials)
+GET {{HotelListing.Api_HostAddress}}/api/basicauth
+Accept: {{json}}
+Authorization: Basic d3Jvbmc6Y3JlZGVudGlhbHM=
 
 ###
 

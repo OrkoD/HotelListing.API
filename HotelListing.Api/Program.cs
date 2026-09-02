@@ -24,10 +24,6 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
 
 builder.Services.AddAuthentication(options =>
 {
-    // options.DefaultAuthenticateScheme = AuthenticationDefaults.BasicScheme; // For Basic Scheme
-    // options.DefaultChallengeScheme = AuthenticationDefaults.BasicScheme;    // For Basic Scheme
-    // options.DefaultAuthenticateScheme = AuthenticationDefaults.ApiKeyScheme;
-    // options.DefaultChallengeScheme = AuthenticationDefaults.ApiKeyScheme;
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })

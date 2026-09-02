@@ -17,9 +17,6 @@ public class HotelListingDbContext(DbContextOptions<HotelListingDbContext> optio
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<ApiKey>(b =>
-            b.HasIndex(k => k.Key).IsUnique());
-
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
