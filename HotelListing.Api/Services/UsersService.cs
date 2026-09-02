@@ -34,12 +34,15 @@ public class UsersService(
             return Result<RegisteredUserDto>.BadRequest(errors);
         }
 
+        await userManager.AddToRoleAsync(user, registerUserDto.Role);
+
         var registeredUserDto = new RegisteredUserDto
         {
             Id = user.Id,
             Email = user.Email,
             FirstName = user.FirstName,
-            LastName = user.LastName
+            LastName = user.LastName,
+            Role = registerUserDto.Role
         };
 
         return Result<RegisteredUserDto>.Success(registeredUserDto);

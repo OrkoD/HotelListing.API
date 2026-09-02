@@ -1,7 +1,7 @@
 @HotelListing.Api_HostAddress = http://localhost:5268
 @json = application/json
 @apiKey = AnP3NdcK49FsdDat45N2l4=
-@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MzUwMmFjZC1mZGE4LTRmMTMtYWE2ZC04YzhmN2FlMzU0ODEiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwianRpIjoiNWQ3YTYwZDItMTAxNy00MjgzLTgyMzMtZDExYzA1NjhiMDJjIiwibmFtZSI6IkpvaG4gRG9lIiwiZXhwIjoxNzg4MzQ5NjkzLCJpc3MiOiJIb3RlbExpc3RpbmdBUEkiLCJhdWQiOiJIb3RlbExpc3RpbmdBUElDbGllbnQifQ.CcZW-0DEQk6DJVXtOKzk9it_ivEeV7IHWLUWPyr5RyA
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiMTdlNzYzODYtMDMzZC00OTJkLThlMmMtZGEyYjA2NGMxMmI5IiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODM1NDQzMSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.i9NJdgV3wzN5EAc2nBxrSkSrID8wlPav844dWheD4Tk
 
 ###############################################
 # HOTELS ENDPOINTS
@@ -59,22 +59,25 @@ DELETE {{HotelListing.Api_HostAddress}}/api/hotels/1
 ### 1. Get All Countries
 GET {{HotelListing.Api_HostAddress}}/api/countries
 Accept: {{json}}
+Authorization: {{jwtToken}}
 
 ###
 
 ### 2. Get Country By ID
 GET {{HotelListing.Api_HostAddress}}/api/countries/1
 Accept: {{json}}
+Authorization: {{jwtToken}}
 
 ###
 
 ### 3. Create New Country
 POST {{HotelListing.Api_HostAddress}}/api/countries
 Content-Type: {{json}}
+Authorization: {{jwtToken}}
 
 {
-  "name": "Bahamas",
-  "shortName": "BS"
+  "name": "United Kingdom",
+  "shortName": "UK"
 }
 
 ###
@@ -106,10 +109,11 @@ POST {{HotelListing.Api_HostAddress}}/api/auth/register
 Content-Type: {{json}}
 
 {
-  "email": "john.doe@example.com",
+  "email": "admin@example.com",
   "password": "Password123!",
-  "firstName": "John",
-  "lastName": "Doe"
+  "firstName": "Admin",
+  "lastName": "Administrator",
+  "role": "Admin"
 }
 
 ###
@@ -132,7 +136,7 @@ POST {{HotelListing.Api_HostAddress}}/api/auth/login
 Content-Type: {{json}}
 
 {
-  "email": "john.doe@example.com",
+  "email": "admin@example.com",
   "password": "Password123!"
 }
 
