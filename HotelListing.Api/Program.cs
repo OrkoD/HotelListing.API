@@ -5,6 +5,9 @@ using HotelListing.Api.Services;
 using HotelListing.Api.Constants;
 using Microsoft.AspNetCore.Authentication;
 using HotelListing.Api.Handlers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,13 +19,27 @@ builder.Services.AddDbContext<HotelListingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<HotelListingDbContext>();
+
 builder.Services.AddAuthentication(options =>
 {
     // options.DefaultAuthenticateScheme = AuthenticationDefaults.BasicScheme; // For Basic Scheme
     // options.DefaultChallengeScheme = AuthenticationDefaults.BasicScheme;    // For Basic Scheme
-    options.DefaultAuthenticateScheme = AuthenticationDefaults.ApiKeyScheme;
-    options.DefaultChallengeScheme = AuthenticationDefaults.ApiKeyScheme;
+    // options.DefaultAuthenticateScheme = AuthenticationDefaults.ApiKeyScheme;
+    // options.DefaultChallengeScheme = AuthenticationDefaults.ApiKeyScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
+    .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!)),
+        ClockSkew = TimeSpan.Zero // Default is 5 min
+    })
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(AuthenticationDefaults.BasicScheme, _ => { })
     .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(AuthenticationDefaults.ApiKeyScheme, _ => { });
 builder.Services.AddAuthorization();
