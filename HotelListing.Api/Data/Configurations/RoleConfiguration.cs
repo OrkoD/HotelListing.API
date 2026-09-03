@@ -22,6 +22,13 @@ public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
                 Name = "User",
                 NormalizedName = "USER",
                 ConcurrencyStamp = "25cb677d-53ab-4e25-8983-6c0e58997592"
+            },
+            new IdentityRole
+            {
+                Id = "0e3f4ba8-53ab-4a0c-92d6-3c0e58997592",
+                Name = "Hotel Admin",
+                NormalizedName = "HOTEL ADMIN",
+                ConcurrencyStamp = "0d001357-4e25-4c0a-b385-7c0e58997590"
             }
         );
     }

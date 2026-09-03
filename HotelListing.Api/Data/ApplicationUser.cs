@@ -11,4 +11,8 @@ public class ApplicationUser : IdentityUser
 
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
+
+    public ICollection<HotelAdmin> Admins { get; set; } = [];
+
+    public ICollection<Booking> Bookings { get; set; } = [];
 }

@@ -13,10 +13,13 @@ public class HotelListingDbContext(DbContextOptions<HotelListingDbContext> optio
 
     public DbSet<ApiKey> ApiKeys { get; set; }
 
+    public DbSet<HotelAdmin> Admins { get; set; }
+
+    public DbSet<Booking> Bookings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
