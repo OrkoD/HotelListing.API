@@ -6,5 +6,6 @@ public record GetHotelDto(
     string Address,
     double Rating,
     int CountryId,
-    string Country
+    string Country,
+    decimal PerNightRate
 );
