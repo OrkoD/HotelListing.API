@@ -19,7 +19,7 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<HotelListingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<HotelListingDbContext>();
 
@@ -56,7 +56,6 @@ builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
 var app = builder.Build();
 
-app.MapGroup("api/default-auth").MapIdentityApi<ApplicationUser>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

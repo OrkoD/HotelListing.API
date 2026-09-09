@@ -1,6 +1,5 @@
 @HostAddress = http://localhost:5268
 @json = application/json
-@bearerToken = YOUR_ACCESS_TOKEN_HERE
 
 ###############################################
 # CUSTOM AUTH CONTROLLER ENDPOINTS (/api/auth)
@@ -11,11 +10,11 @@ POST {{HostAddress}}/api/auth/register
 Content-Type: {{json}}
 
 {
-  "email": "admin@example.com",
+  "email": "hotel_admin@example.com",
   "password": "Password123!",
-  "firstName": "Admin",
+  "firstName": "HotelAdmin",
   "lastName": "Administrator",
-  "role": "Admin"
+  "role": "Hotel Admin"
 }
 
 ###
@@ -33,7 +32,7 @@ Content-Type: {{json}}
 
 ###
 
-### 3. Login User (Success)
+### 3. Login User (Success - Returns JWT Token)
 POST {{HostAddress}}/api/auth/login
 Content-Type: {{json}}
 
@@ -54,81 +53,3 @@ Content-Type: {{json}}
 }
 
 ###
-
-
-###############################################
-# BUILT-IN IDENTITY ENDPOINTS (/api/default-auth)
-###############################################
-
-### 1. Default Register
-POST {{HostAddress}}/api/default-auth/register
-Content-Type: {{json}}
-
-{
-  "email": "defaultuser@example.com",
-  "password": "Password123!"
-}
-
-###
-
-### 2. Default Login (Get Bearer & Refresh Token)
-POST {{HostAddress}}/api/default-auth/login?useCookies=false
-Content-Type: {{json}}
-
-{
-  "email": "defaultuser@example.com",
-  "password": "Password123!"
-}
-
-###
-
-### 3. Default Refresh Token
-POST {{HostAddress}}/api/default-auth/refresh
-Content-Type: {{json}}
-
-{
-  "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
-}
-
-###
-
-### 4. Default Get User Profile Info (Requires Auth)
-GET {{HostAddress}}/api/default-auth/manage/info
-Accept: {{json}}
-Authorization: Bearer {{bearerToken}}
-
-###
-
-### 5. Default Update User Email / Password (Requires Auth)
-POST {{HostAddress}}/api/default-auth/manage/info
-Content-Type: {{json}}
-Authorization: Bearer {{bearerToken}}
-
-{
-  "newEmail": "newuser@example.com",
-  "newPassword": "NewPassword123!",
-  "oldPassword": "Password123!"
-}
-
-###
-
-### 6. Default Forgot Password
-POST {{HostAddress}}/api/default-auth/forgotPassword
-Content-Type: {{json}}
-
-{
-  "email": "defaultuser@example.com"
-}
-
-###
-
-### 7. Default Resend Confirmation Email
-POST {{HostAddress}}/api/default-auth/resendConfirmationEmail
-Content-Type: {{json}}
-
-{
-  "email": "defaultuser@example.com"
-}
-
-###
-
