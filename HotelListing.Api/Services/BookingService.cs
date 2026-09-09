@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Api.Services;
 
-public class BookingService(HotelListingDbContext db, IHttpContextAccessor httpContextAccessor) : IBookingService
+public class BookingService(HotelListingDbContext db, IUsersService usersService) : IBookingService
 {
     public async Task<Result<IEnumerable<GetBookingDto>>> GetBookingsForHotelAsync(int hotelId)
     {
@@ -42,7 +42,7 @@ public class BookingService(HotelListingDbContext db, IHttpContextAccessor httpC
 
     public async Task<Result<GetBookingDto>> CreateBookingAsync(CreateBookingDto dto)
     {
-        var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = usersService.UserId;
 
         if (string.IsNullOrEmpty(userId))
             return Result<GetBookingDto>
@@ -112,7 +112,7 @@ public class BookingService(HotelListingDbContext db, IHttpContextAccessor httpC
 
     public async Task<Result<GetBookingDto>> UpdateBookingAsync(int hotelId, int bookingId, UpdateBookingDto dto)
     {
-        var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = usersService.UserId;
 
         if (string.IsNullOrEmpty(userId))
             return Result<GetBookingDto>
@@ -179,7 +179,7 @@ public class BookingService(HotelListingDbContext db, IHttpContextAccessor httpC
 
     public async Task<Result> CancelBookingAsync(int hotelId, int bookingId)
     {
-        var userId = httpContextAccessor?.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = usersService.UserId;
 
         var booking = await db.Bookings
             .FirstOrDefaultAsync(b => b.Id == bookingId && b.HotelId == hotelId && b.UserId == userId);
@@ -191,6 +191,57 @@ public class BookingService(HotelListingDbContext db, IHttpContextAccessor httpC
             return Result.Failure(new Error(ErrorCodes.Conflict, $"This booking has already been canceled."));
 
         booking.Status = BookingStatus.Cancelled;
+        booking.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    public async Task<Result> AdminCancelBookingAsync(int hotelId, int bookingId)
+    {
+        var userId = usersService.UserId;
+
+        var isHotelAdmin = await db.HotelAdmins.AnyAsync(a => a.UserId == userId && a.HotelId == hotelId);
+
+        if (!isHotelAdmin)
+            return Result.Failure(new Error(ErrorCodes.Forbid, $"You are not an admin of the selected hotel."));
+
+        var booking = await db.Bookings
+            .FirstOrDefaultAsync(b => b.Id == bookingId && b.HotelId == hotelId);
+
+        if (booking is null)
+            return Result.Failure(new Error(ErrorCodes.NotFound, $"Booking '{bookingId}' was not found."));
+
+        if (booking.Status == BookingStatus.Cancelled)
+            return Result.Failure(new Error(ErrorCodes.Conflict, $"This booking has already been canceled."));
+
+        booking.Status = BookingStatus.Cancelled;
+        booking.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    public async Task<Result> AdminConfirmBookingAsync(int hotelId, int bookingId)
+    {
+        var userId = usersService.UserId;
+        var isAdmin = await db.HotelAdmins.AnyAsync(a => a.UserId == userId && a.HotelId == hotelId);
+
+        if (!isAdmin)
+            return Result.Failure(new Error(ErrorCodes.Forbid, $"You are not an admin of the selected hotel."));
+
+        var booking = await db.Bookings
+            .FirstOrDefaultAsync(b => b.Id == bookingId && b.HotelId == hotelId);
+
+        if (booking is null)
+            return Result.Failure(new Error(ErrorCodes.NotFound, $"Booking '{bookingId}' was not found."));
+
+        if (booking.Status == BookingStatus.Confirmed)
+            return Result.Failure(new Error(ErrorCodes.Conflict, $"This booking has already been confirmed."));
+
+        booking.Status = BookingStatus.Confirmed;
         booking.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync();

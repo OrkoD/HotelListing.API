@@ -29,6 +29,7 @@ public abstract class ApiControllerBase : ControllerBase
             ErrorCodes.BadRequest => BadRequest(error.Description),    // 400
             ErrorCodes.Validation => BadRequest(error.Description),    // 400
             ErrorCodes.Conflict => Conflict(error.Description),        // 409
+            ErrorCodes.Forbid => Forbid(error.Description),            // 403
             _ => Problem(detail: string.Join("; ", errors.Select(e => e.Description)), title: error.Code)
         };
     }

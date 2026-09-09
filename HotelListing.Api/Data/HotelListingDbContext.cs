@@ -13,7 +13,7 @@ public class HotelListingDbContext(DbContextOptions<HotelListingDbContext> optio
 
     public DbSet<ApiKey> ApiKeys { get; set; }
 
-    public DbSet<HotelAdmin> Admins { get; set; }
+    public DbSet<HotelAdmin> HotelAdmins { get; set; }
 
     public DbSet<Booking> Bookings { get; set; }
 

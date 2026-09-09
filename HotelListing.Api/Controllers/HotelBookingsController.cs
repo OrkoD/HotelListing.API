@@ -7,9 +7,11 @@ namespace HotelListing.Api.Controllers;
 
 [ApiController]
 [Route("api/hotels/{hotelId:int}/bookings")]
+[Authorize]
 public class HotelBookingsController(IBookingService bookingService) : ApiControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Hotel Admin, Admin")]
     public async Task<ActionResult<IEnumerable<GetBookingDto>>> GetBookings([FromRoute] int hotelId) =>
         ToActionResult(await bookingService.GetBookingsForHotelAsync(hotelId));
 
@@ -27,5 +29,15 @@ public class HotelBookingsController(IBookingService bookingService) : ApiContro
 
     [HttpPut("{bookingId:int}/cancel")]
     public async Task<IActionResult> CancelBooking([FromRoute] int hotelId, [FromRoute] int bookingId) =>
-        ToActionResult(await bookingService.CancelBookingAsync(hotelId,bookingId));
+        ToActionResult(await bookingService.CancelBookingAsync(hotelId, bookingId));
+
+    [HttpPut("{bookingId:int}/admin/cancel")]
+    [Authorize(Roles = "Hotel Admin, Admin")]
+    public async Task<IActionResult> AdminCancelBooking([FromRoute] int hotelId, [FromRoute] int bookingId) =>
+        ToActionResult(await bookingService.AdminCancelBookingAsync(hotelId, bookingId));
+
+    [HttpPut("{bookingId:int}/admin/confirm")]
+    [Authorize(Roles = "Hotel Admin, Admin")]
+    public async Task<IActionResult> AdminConfirmBooking([FromRoute] int hotelId, [FromRoute] int bookingId) =>
+        ToActionResult(await bookingService.AdminConfirmBookingAsync(hotelId, bookingId));
 }
