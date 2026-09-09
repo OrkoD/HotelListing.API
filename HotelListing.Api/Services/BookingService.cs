@@ -40,6 +40,36 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
         return Result<IEnumerable<GetBookingDto>>.Success(bookings);
     }
 
+    public async Task<Result<IEnumerable<GetBookingDto>>> GetUserBookingsForHotelAsync(int hotelId)
+    {
+        var userId = usersService.UserId;
+        var hotelExists = await db.Hotels.AnyAsync(h => h.Id == hotelId);
+
+        if (!hotelExists)
+            return Result<IEnumerable<GetBookingDto>>
+                .Failure(new Error(ErrorCodes.NotFound, $"Hotel {hotelId} was not found."));
+
+        var bookings = await db.Bookings
+            .AsNoTracking()
+            .Where(b => b.HotelId == hotelId && b.UserId == userId)
+            .OrderBy(b => b.CheckIn)
+            .Select(b => new GetBookingDto(
+                b.Id,
+                b.HotelId,
+                b.Hotel!.Name,
+                b.CheckIn,
+                b.CheckOut,
+                b.Guests,
+                b.TotalPrice,
+                b.Status.ToString(),
+                b.CreatedAtUtc,
+                b.UpdatedAtUtc
+            ))
+            .ToListAsync();
+
+        return Result<IEnumerable<GetBookingDto>>.Success(bookings);
+    }
+
     public async Task<Result<GetBookingDto>> CreateBookingAsync(CreateBookingDto dto)
     {
         var userId = usersService.UserId;
@@ -200,13 +230,6 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
 
     public async Task<Result> AdminCancelBookingAsync(int hotelId, int bookingId)
     {
-        var userId = usersService.UserId;
-
-        var isHotelAdmin = await db.HotelAdmins.AnyAsync(a => a.UserId == userId && a.HotelId == hotelId);
-
-        if (!isHotelAdmin)
-            return Result.Failure(new Error(ErrorCodes.Forbid, $"You are not an admin of the selected hotel."));
-
         var booking = await db.Bookings
             .FirstOrDefaultAsync(b => b.Id == bookingId && b.HotelId == hotelId);
 
@@ -226,12 +249,6 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
 
     public async Task<Result> AdminConfirmBookingAsync(int hotelId, int bookingId)
     {
-        var userId = usersService.UserId;
-        var isAdmin = await db.HotelAdmins.AnyAsync(a => a.UserId == userId && a.HotelId == hotelId);
-
-        if (!isAdmin)
-            return Result.Failure(new Error(ErrorCodes.Forbid, $"You are not an admin of the selected hotel."));
-
         var booking = await db.Bookings
             .FirstOrDefaultAsync(b => b.Id == bookingId && b.HotelId == hotelId);
 

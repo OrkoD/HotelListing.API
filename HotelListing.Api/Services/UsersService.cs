@@ -7,6 +7,7 @@ using HotelListing.Api.Data;
 using HotelListing.Api.DTOs.Auth;
 using HotelListing.Api.Results;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HotelListing.Api.Services;
