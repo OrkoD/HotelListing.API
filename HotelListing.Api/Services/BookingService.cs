@@ -78,16 +78,6 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
             return Result<GetBookingDto>
                 .Failure(new Error(ErrorCodes.Validation, "User is required."));
 
-        var nights = dto.CheckOut.DayNumber - dto.CheckIn.DayNumber;
-
-        if (nights <= 0)
-            return Result<GetBookingDto>
-                .Failure(new Error(ErrorCodes.Validation, "Check-out must be after check-in."));
-
-        if (dto.Guests <= 0)
-            return Result<GetBookingDto>
-                .Failure(new Error(ErrorCodes.Validation, "Guests must be at least one."));
-
         var overlaps = await db.Bookings
             .AnyAsync(b => b.HotelId == dto.HotelId
                 && b.UserId == userId
@@ -108,6 +98,7 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
             return Result<GetBookingDto>
                 .Failure(new Error(ErrorCodes.NotFound, $"Hotel '{dto.HotelId}' was not found."));
 
+        var nights = dto.CheckOut.DayNumber - dto.CheckIn.DayNumber;
         var totalPrice = hotel.PerNightRate * nights;
 
         var booking = new Booking
@@ -148,18 +139,9 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
             return Result<GetBookingDto>
                 .Failure(new Error(ErrorCodes.Validation, "User is required."));
 
-        var nights = dto.CheckOut.DayNumber - dto.CheckIn.DayNumber;
-
-        if (nights <= 0)
-            return Result<GetBookingDto>
-                .Failure(new Error(ErrorCodes.Validation, "Check-out must be after check-in."));
-
-        if (dto.Guests <= 0)
-            return Result<GetBookingDto>
-                .Failure(new Error(ErrorCodes.Validation, "Guests must be at least one."));
-
         var overlaps = await db.Bookings
             .AnyAsync(b => b.HotelId == hotelId
+                && b.Id != bookingId
                 && b.UserId == userId
                 && b.Status != BookingStatus.Cancelled
                 && dto.CheckIn < b.CheckOut
@@ -182,11 +164,12 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
             return Result<GetBookingDto>
                 .Failure(new Error(ErrorCodes.Conflict, $"Canceled bookings cannot be modified."));
 
+        var nights = dto.CheckOut.DayNumber - dto.CheckIn.DayNumber;
         var perNightRate = booking.Hotel!.PerNightRate;
         booking.CheckIn = dto.CheckIn;
         booking.CheckOut = dto.CheckOut;
         booking.Guests = dto.Guests;
-        booking.TotalPrice = perNightRate * (dto.CheckOut.DayNumber - dto.CheckIn.DayNumber);
+        booking.TotalPrice = perNightRate * nights;
         booking.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync();

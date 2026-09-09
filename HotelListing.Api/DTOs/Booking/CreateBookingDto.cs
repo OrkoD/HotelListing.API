@@ -2,25 +2,21 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HotelListing.Api.DTOs.Booking;
 
-public class CreateBookingDto
+public record CreateBookingDto(
+    [Required] int HotelId,
+    DateOnly CheckIn,
+    DateOnly CheckOut,
+    [Required][Range(1, 10)] int Guests
+) : IValidatableObject
 {
-    [Required]
-    public int HotelId { get; set; }
-    [Required]
-    public DateOnly CheckIn { get; set; }
-
-    [Required]
-    public DateOnly CheckOut { get; set; }
-
-    [Required]
-    [Range(1, 20, ErrorMessage = "Guests must be between 1 and 20.")]
-    public int Guests { get; set; }
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (CheckOut <= CheckIn)
+        {
+            yield return new ValidationResult(
+                "Check-out must be after check-in.",
+                [nameof(CheckOut), nameof(CheckIn)]
+            );
+        }
+    }
 }
-
-// The record is used by mentor
-// public record CreateBookingDto(
-//     int HotelId,
-//     DateOnly CheckIn,
-//     DateOnly CheckOut,
-//     int Guests
-// );
