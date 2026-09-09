@@ -1,0 +1,67 @@
+@HostAddress = http://localhost:5268
+@json = application/json
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiYzg4YjlkMTctNDA5NC00Y2EwLWFkNjYtZDhmY2ZjYzI0NDJkIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODQ0MzE2MiwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.E9WTo0M1dfy0ZfYurqfo-rf13JeuK7DcX5o2yDdH4wA
+
+###############################################
+# HOTEL BOOKINGS ENDPOINTS (/api/hotels/{hotelId}/bookings)
+###############################################
+
+### 1. Create a New Booking for Hotel (Requires JWT Token)
+POST {{HostAddress}}/api/hotels/5/bookings
+Content-Type: {{json}}
+Authorization: {{jwtToken}}
+
+{
+  "hotelId": 5,
+  "checkIn": "2026-09-12",
+  "checkOut": "2026-09-15",
+  "guests": 2
+}
+
+###
+
+### 2. Get User Bookings for Hotel
+GET {{HostAddress}}/api/hotels/5/bookings
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 3. Get All Bookings for Hotel (Admin Only)
+GET {{HostAddress}}/api/hotels/5/bookings/admin
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 4. Update Booking
+PUT {{HostAddress}}/api/hotels/5/bookings/1
+Content-Type: {{json}}
+Authorization: {{jwtToken}}
+
+{
+  "checkIn": "2026-09-13",
+  "checkOut": "2026-09-16",
+  "guests": 3
+}
+
+###
+
+### 5. Cancel Booking (User)
+PUT {{HostAddress}}/api/hotels/5/bookings/1/cancel
+Authorization: {{jwtToken}}
+
+###
+
+### 6. Admin Cancel Booking
+PUT {{HostAddress}}/api/hotels/5/bookings/1/admin/cancel
+Authorization: {{jwtToken}}
+
+###
+
+### 7. Admin Confirm Booking
+PUT {{HostAddress}}/api/hotels/5/bookings/1/admin/confirm
+Authorization: {{jwtToken}}
+
+###
+

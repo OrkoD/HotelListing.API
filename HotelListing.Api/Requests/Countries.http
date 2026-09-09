@@ -1,0 +1,51 @@
+@HostAddress = http://localhost:5268
+@json = application/json
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiYzg4YjlkMTctNDA5NC00Y2EwLWFkNjYtZDhmY2ZjYzI0NDJkIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODQ0MzE2MiwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.E9WTo0M1dfy0ZfYurqfo-rf13JeuK7DcX5o2yDdH4wA
+
+###############################################
+# COUNTRIES ENDPOINTS
+###############################################
+
+### 1. Get All Countries
+GET {{HostAddress}}/api/countries
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 2. Get Country By ID
+GET {{HostAddress}}/api/countries/1
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 3. Create New Country
+POST {{HostAddress}}/api/countries
+Content-Type: {{json}}
+Authorization: {{jwtToken}}
+
+{
+  "name": "United Kingdom",
+  "shortName": "UK"
+}
+
+###
+
+### 4. Update Country
+PUT {{HostAddress}}/api/countries/1
+Content-Type: {{json}}
+
+{
+  "id": 1,
+  "name": "Jamaica",
+  "shortName": "JM"
+}
+
+###
+
+### 5. Delete Country By ID
+DELETE {{HostAddress}}/api/countries/1
+
+###
+

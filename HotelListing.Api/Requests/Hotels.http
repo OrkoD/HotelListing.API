@@ -1,0 +1,51 @@
+@HostAddress = http://localhost:5268
+@json = application/json
+
+###############################################
+# HOTELS ENDPOINTS
+###############################################
+
+### 1. Get All Hotels
+GET {{HostAddress}}/api/hotels
+Accept: {{json}}
+
+###
+
+### 2. Get Hotel By ID
+GET {{HostAddress}}/api/hotels/5
+Accept: {{json}}
+
+###
+
+### 3. Create New Hotel (Linked to CountryId: 1)
+POST {{HostAddress}}/api/hotels
+Content-Type: {{json}}
+
+{
+  "name": "Grand Palladium Resort",
+  "address": "Lucea, Hanover",
+  "rating": 4.6,
+  "countryId": 1
+}
+
+###
+
+### 4. Update Hotel
+PUT {{HostAddress}}/api/hotels/4
+Content-Type: {{json}}
+
+{
+  "id": 4,
+  "name": "Tarasivska Resort",
+  "address": "Tarasivska str",
+  "rating": 4.9,
+  "countryId": 1
+}
+
+###
+
+### 5. Delete Hotel By ID
+DELETE {{HostAddress}}/api/hotels/1
+
+###
+

@@ -1,0 +1,56 @@
+@HostAddress = http://localhost:5268
+@json = application/json
+@apiKey = AnP3NdcK49FsdDat45N2l4=
+@basicAuthHeader = Basic am9obi5kb2VAZXhhbXBsZS5jb206UGFzc3dvcmQxMjMh
+
+###############################################
+# API KEY AUTHENTICATION ENDPOINTS (/api/apikey)
+###############################################
+
+### 1. Test API Key Auth (Success)
+GET {{HostAddress}}/api/apikey
+Accept: {{json}}
+X-Api-Key: {{apiKey}}
+
+###
+
+### 2. Test API Key Secret Endpoint (Success)
+GET {{HostAddress}}/api/apikey/secret
+Accept: {{json}}
+X-Api-Key: {{apiKey}}
+
+###
+
+### 3. Test API Key Auth (Failure - Invalid Key)
+GET {{HostAddress}}/api/apikey
+Accept: {{json}}
+X-Api-Key: InvalidApiKey12345
+
+###
+
+
+###############################################
+# BASIC AUTHENTICATION ENDPOINTS (/api/basicauth)
+###############################################
+
+### 1. Test Basic Auth (Success - john.doe@example.com:Password123!)
+GET {{HostAddress}}/api/basicauth
+Accept: {{json}}
+Authorization: {{basicAuthHeader}}
+
+###
+
+### 2. Test Basic Auth Profile (Success)
+GET {{HostAddress}}/api/basicauth/profile
+Accept: {{json}}
+Authorization: {{basicAuthHeader}}
+
+###
+
+### 3. Test Basic Auth (Failure - Invalid Credentials)
+GET {{HostAddress}}/api/basicauth
+Accept: {{json}}
+Authorization: Basic d3Jvbmc6Y3JlZGVudGlhbHM=
+
+###
+
