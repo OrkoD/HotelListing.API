@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using HotelListing.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -29,7 +30,8 @@ public class HotelOrSystemAdminFilter(HotelListingDbContext db) : IAsyncAuthoriz
         if (httpUser!.IsInRole("Admin"))
             return;
 
-        var userId = httpUser.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var userId = httpUser.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+            ?? httpUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrWhiteSpace(userId))
         {
