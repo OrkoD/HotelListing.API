@@ -15,11 +15,21 @@ namespace HotelListing.Api.Services;
 public class UsersService(
     UserManager<ApplicationUser> userManager,
     IConfiguration configuration,
-    IHttpContextAccessor httpContextAccessor
+    IHttpContextAccessor httpContextAccessor,
+    HotelListingDbContext db
 ) : IUsersService
 {
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
+        var isHotelAdmin = string.Equals(registerUserDto.Role, "Hotel Admin", StringComparison.OrdinalIgnoreCase);
+        if (isHotelAdmin)
+        {
+            var hotelExists = await db.Hotels.AnyAsync(h => h.Id == registerUserDto.AssociatedHotelId);
+            if (!hotelExists)
+                return Result<RegisteredUserDto>.Failure(
+                    new Error(ErrorCodes.NotFound, $"Hotel with Id '{registerUserDto.AssociatedHotelId}' does not exist."));
+        }
+
         var user = new ApplicationUser
         {
             Email = registerUserDto.Email,
@@ -37,6 +47,16 @@ public class UsersService(
         }
 
         await userManager.AddToRoleAsync(user, registerUserDto.Role);
+
+        if (isHotelAdmin)
+        {
+            db.HotelAdmins.Add(new HotelAdmin
+            {
+                UserId = user.Id,
+                HotelId = registerUserDto.AssociatedHotelId!.Value
+            });
+            await db.SaveChangesAsync();
+        }
 
         var registeredUserDto = new RegisteredUserDto
         {

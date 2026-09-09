@@ -1,6 +1,6 @@
 @HostAddress = http://localhost:5268
 @json = application/json
-@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiYzg4YjlkMTctNDA5NC00Y2EwLWFkNjYtZDhmY2ZjYzI0NDJkIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4ODQ0MzE2MiwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.E9WTo0M1dfy0ZfYurqfo-rf13JeuK7DcX5o2yDdH4wA
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YzMyMmNhMy1jMDI4LTRhNjAtOTgxNy05YWMyYTlmOGJiOTgiLCJlbWFpbCI6ImhvdGVsLWFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZmE4OWZiMjYtODFkOC00ZmZhLTg5YTEtMTJmNmJmZDJjZTg1IiwibmFtZSI6IkhvdGVsQWRtaW4gQWRtaW5pc3RyYXRvciIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkhvdGVsIEFkbWluIiwiZXhwIjoxNzg4OTg3NjI5LCJpc3MiOiJIb3RlbExpc3RpbmdBUEkiLCJhdWQiOiJIb3RlbExpc3RpbmdBUElDbGllbnQifQ.c8qtVm0gJMRk7mEnD9XtsNl1FkioQhNcLXQd3d8eJJg
 
 ###############################################
 # HOTEL BOOKINGS ENDPOINTS (/api/hotels/{hotelId}/bookings)
@@ -35,7 +35,7 @@ Authorization: {{jwtToken}}
 ###
 
 ### 4. Update Booking
-PUT {{HostAddress}}/api/hotels/5/bookings/1
+PUT {{HostAddress}}/api/hotels/5/bookings/8
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
 
@@ -48,19 +48,19 @@ Authorization: {{jwtToken}}
 ###
 
 ### 5. Cancel Booking (User)
-PUT {{HostAddress}}/api/hotels/5/bookings/1/cancel
+PUT {{HostAddress}}/api/hotels/5/bookings/8/cancel
 Authorization: {{jwtToken}}
 
 ###
 
 ### 6. Admin Cancel Booking
-PUT {{HostAddress}}/api/hotels/5/bookings/1/admin/cancel
+PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/cancel
 Authorization: {{jwtToken}}
 
 ###
 
 ### 7. Admin Confirm Booking
-PUT {{HostAddress}}/api/hotels/5/bookings/1/admin/confirm
+PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/confirm
 Authorization: {{jwtToken}}
 
 ###

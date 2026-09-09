@@ -10,11 +10,12 @@ POST {{HostAddress}}/api/auth/register
 Content-Type: {{json}}
 
 {
-  "email": "hotel_admin@example.com",
+  "email": "hotel-admin@example.com",
   "password": "Password123!",
   "firstName": "HotelAdmin",
   "lastName": "Administrator",
-  "role": "Hotel Admin"
+  "role": "Hotel Admin",
+  "associatedHotelId": 5
 }
 
 ###
@@ -36,10 +37,20 @@ Content-Type: {{json}}
 POST {{HostAddress}}/api/auth/login
 Content-Type: {{json}}
 
+# {
+#   "email": "admin@example.com",
+#   "password": "Password123!"
+# }
+
 {
-  "email": "admin@example.com",
+  "email": "hotel-admin@example.com",
   "password": "Password123!"
 }
+
+# {
+#   "email": "defaultuser@example.com",
+#   "password": "Password123!"
+# }
 
 ###
 

@@ -65,7 +65,6 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
                 .Failure(new Error(ErrorCodes.Conflict, $"The selected dates overlap with an existing booking."));
 
         var hotel = await db.Hotels
-            .AsNoTracking()
             .FirstOrDefaultAsync(h => h.Id == dto.HotelId);
 
         if (hotel is null)
