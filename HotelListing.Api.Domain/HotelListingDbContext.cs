@@ -2,7 +2,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelListing.Api.Data;
+namespace HotelListing.Api.Domain;
 
 public class HotelListingDbContext(DbContextOptions<HotelListingDbContext> options)
     : IdentityDbContext<ApplicationUser>(options)

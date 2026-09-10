@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace HotelListing.Api.Data;
+namespace HotelListing.Api.Domain;
 
 public class ApplicationUser : IdentityUser
 {
