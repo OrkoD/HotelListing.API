@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Common.Models;
+using HotelListing.Api.Application.MappingProfiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +58,7 @@ builder.Services.AddScoped<IHotelsService, HotelsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(IBookingService).Assembly));
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(HotelMappingProfile).Assembly));
 
 var app = builder.Build();
 

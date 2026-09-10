@@ -1,5 +1,6 @@
 @HostAddress = http://localhost:5268
 @json = application/json
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZmNkMTc4ODAtYzZhMi00MzkwLTg5NTctMjYyZmVlMTMxOWVhIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTA0ODcyMywiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.3J5mjBgAt8Kuc4dyQ5uCUsmqsJIQEeq1hJnOptwSlBM
 
 ###############################################
 # HOTELS ENDPOINTS
@@ -8,24 +9,27 @@
 ### 1. Get All Hotels
 GET {{HostAddress}}/api/hotels
 Accept: {{json}}
+Authorization: {{jwtToken}}
 
 ###
 
 ### 2. Get Hotel By ID
 GET {{HostAddress}}/api/hotels/5
 Accept: {{json}}
+Authorization: {{jwtToken}}
 
 ###
 
 ### 3. Create New Hotel (Linked to CountryId: 1)
 POST {{HostAddress}}/api/hotels
 Content-Type: {{json}}
+Authorization: {{jwtToken}}
 
 {
-  "name": "Grand Palladium Resort",
-  "address": "Lucea, Hanover",
+  "name": "Jewels Runaway Bay",
+  "address": "Ocho Rios, Jamaica",
   "rating": 4.6,
-  "countryId": 1
+  "countryId": 3
 }
 
 ###
@@ -33,6 +37,7 @@ Content-Type: {{json}}
 ### 4. Update Hotel
 PUT {{HostAddress}}/api/hotels/4
 Content-Type: {{json}}
+Authorization: {{jwtToken}}
 
 {
   "id": 4,
@@ -46,6 +51,7 @@ Content-Type: {{json}}
 
 ### 5. Delete Hotel By ID
 DELETE {{HostAddress}}/api/hotels/1
+Authorization: {{jwtToken}}
 
 ###
 

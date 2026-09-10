@@ -37,15 +37,15 @@ Content-Type: {{json}}
 POST {{HostAddress}}/api/auth/login
 Content-Type: {{json}}
 
-# {
-#   "email": "admin@example.com",
-#   "password": "Password123!"
-# }
-
 {
-  "email": "hotel-admin@example.com",
+  "email": "admin@example.com",
   "password": "Password123!"
 }
+
+# {
+#   "email": "hotel-admin@example.com",
+#   "password": "Password123!"
+# }
 
 # {
 #   "email": "defaultuser@example.com",
