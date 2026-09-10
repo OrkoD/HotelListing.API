@@ -2,7 +2,6 @@ using HotelListing.Api.Data;
 using HotelListing.Api.Contracts;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Services;
-using HotelListing.Api.Constants;
 using Microsoft.AspNetCore.Authentication;
 using HotelListing.Api.Handlers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
+using HotelListing.Api.Common.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 

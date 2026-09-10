@@ -1,6 +1,6 @@
-using HotelListing.Api.Constants;
+using HotelListing.Api.Common.Constants;
 
-namespace HotelListing.Api.Results;
+namespace HotelListing.Api.Common.Results;
 
 public readonly record struct Error(string Code, string Description)
 {

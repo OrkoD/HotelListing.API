@@ -1,3 +1,5 @@
+using HotelListing.Api.Common.Constants;
+
 namespace HotelListing.Api.DTOs.Auth;
 
 public class RegisteredUserDto
@@ -10,5 +12,5 @@ public class RegisteredUserDto
 
     public string LastName { get; set; } = string.Empty;
 
-    public string Role { get; set; } = "User";
+    public string Role { get; set; } = RoleNames.User;
 }

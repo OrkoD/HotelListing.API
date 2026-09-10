@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="HotelListing.Api.Common/HotelListing.Api.Common.csproj" />
+  <Project Path="HotelListing.Api/HotelListing.Api.csproj" />
+</Solution>

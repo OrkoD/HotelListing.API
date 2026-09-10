@@ -20,4 +20,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../HotelListing.Api.Common/HotelListing.Api.Common.csproj" />
+  </ItemGroup>
+
 </Project>

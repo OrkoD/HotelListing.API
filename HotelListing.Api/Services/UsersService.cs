@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using HotelListing.Api.Constants;
+using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Common.Results;
 using HotelListing.Api.Contracts;
 using HotelListing.Api.Data;
 using HotelListing.Api.DTOs.Auth;
-using HotelListing.Api.Results;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,7 +21,7 @@ public class UsersService(
 {
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
-        var isHotelAdmin = string.Equals(registerUserDto.Role, "Hotel Admin", StringComparison.OrdinalIgnoreCase);
+        var isHotelAdmin = string.Equals(registerUserDto.Role, RoleNames.HotelAdmin, StringComparison.OrdinalIgnoreCase);
         if (isHotelAdmin)
         {
             var hotelExists = await db.Hotels.AnyAsync(h => h.Id == registerUserDto.AssociatedHotelId);

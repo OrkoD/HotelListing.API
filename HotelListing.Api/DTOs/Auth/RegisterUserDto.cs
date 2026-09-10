@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using HotelListing.Api.Common.Constants;
 
 namespace HotelListing.Api.DTOs.Auth;
 
@@ -16,13 +17,13 @@ public class RegisterUserDto : IValidatableObject
     [Required, MaxLength(100)]
     public string LastName { get; set; } = string.Empty;
 
-    public string Role { get; set; } = "User";
+    public string Role { get; set; } = RoleNames.User;
 
     public int? AssociatedHotelId { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (string.Equals(Role, "Hotel Admin", StringComparison.OrdinalIgnoreCase) && AssociatedHotelId.GetValueOrDefault() < 1)
+        if (string.Equals(Role, RoleNames.HotelAdmin, StringComparison.OrdinalIgnoreCase) && AssociatedHotelId.GetValueOrDefault() < 1)
         {
             yield return new ValidationResult(
                 "Please provide a valid hotel Id.",
