@@ -1,7 +1,7 @@
 using HotelListing.Api.Domain;
-using HotelListing.Api.Contracts;
+using HotelListing.Api.Application.Contracts;
 using Microsoft.EntityFrameworkCore;
-using HotelListing.Api.Services;
+using HotelListing.Api.Application.Services;
 using Microsoft.AspNetCore.Authentication;
 using HotelListing.Api.Handlers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,7 +57,7 @@ builder.Services.AddScoped<IHotelsService, HotelsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(IBookingService).Assembly));
 
 var app = builder.Build();
 

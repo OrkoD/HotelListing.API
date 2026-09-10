@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="HotelListing.Api.Common/HotelListing.Api.Common.csproj" />
   <Project Path="HotelListing.Api.Domain/HotelListing.Api.Domain.csproj" />
+  <Project Path="HotelListing.Api.Application/HotelListing.Api.Application.csproj" />
   <Project Path="HotelListing.Api/HotelListing.Api.csproj" />
 </Solution>
