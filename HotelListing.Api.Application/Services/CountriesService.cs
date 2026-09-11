@@ -8,19 +8,39 @@ using HotelListing.Api.Application.DTOs.Country;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Models.Extensions;
+using HotelListing.Api.Application.DTOs.Hotel;
 
 namespace HotelListing.Api.Application.Services;
 
 public class CountriesService(HotelListingDbContext context, IMapper mapper) : ICountriesService
 {
-    public async Task<Result<PageResult<GetCountriesDto>>> GetCountriesAsync(PaginationParameters paginationParameters)
+    public async Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync()
     {
         var countries = await context.Countries
             .OrderBy(c => c.CountryId)
             .ProjectTo<GetCountriesDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        return Result<IEnumerable<GetCountriesDto>>.Success(countries);
+    }
+
+    public async Task<Result<PageResult<GetHotelDto>>> GetCountryHotelsAsync(
+        int countryId,
+        PaginationParameters paginationParameters
+    )
+    {
+        var exists = await CountryExistsAsync(countryId);
+
+        if (!exists)
+            return Result<PageResult<GetHotelDto>>.NotFound($"Country '{countryId}' was not found.");
+
+        var hotels = await context.Hotels
+            .Where(h => h.CountryId == countryId)
+            .OrderBy(h => h.Name)
+            .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .ToPageResultAsync(paginationParameters);
 
-        return Result<PageResult<GetCountriesDto>>.Success(countries);
+        return Result<PageResult<GetHotelDto>>.Success(hotels);
     }
 
     public async Task<Result<GetCountryDto>> GetCountryAsync(int id)
