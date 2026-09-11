@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HotelListing.Api.Common.Constants;
-using HotelListing.Api.Common.Models;
 using HotelListing.Api.Common.Results;
 using HotelListing.Api.Application.Contracts;
 using HotelListing.Api.Domain;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using HotelListing.Api.Common.Models.Config;
 
 namespace HotelListing.Api.Application.Services;
 

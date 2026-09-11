@@ -3,6 +3,7 @@ using HotelListing.Api.Application.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Common.Models.Paging;
 
 namespace HotelListing.Api.Controllers;
 
@@ -12,8 +13,10 @@ namespace HotelListing.Api.Controllers;
 public class CountriesController(ICountriesService countriesService) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries() =>
-        ToActionResult(await countriesService.GetCountriesAsync());
+    public async Task<ActionResult<PageResult<GetCountriesDto>>> GetCountries(
+        [FromQuery] PaginationParameters paginationParameters
+    ) =>
+        ToActionResult(await countriesService.GetCountriesAsync(paginationParameters));
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<GetCountryDto>> GetCountry(int id) =>

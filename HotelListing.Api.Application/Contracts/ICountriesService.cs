@@ -1,11 +1,12 @@
 using HotelListing.Api.Common.Results;
 using HotelListing.Api.Application.DTOs.Country;
+using HotelListing.Api.Common.Models.Paging;
 
 namespace HotelListing.Api.Application.Contracts;
 
 public interface ICountriesService
 {
-    Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync();
+    Task<Result<PageResult<GetCountriesDto>>> GetCountriesAsync(PaginationParameters paginationParameters);
 
     Task<Result<GetCountryDto>> GetCountryAsync(int id);
 

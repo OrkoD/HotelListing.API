@@ -9,8 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using HotelListing.Api.Common.Constants;
-using HotelListing.Api.Common.Models;
 using HotelListing.Api.Application.MappingProfiles;
+using HotelListing.Api.Common.Models.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
