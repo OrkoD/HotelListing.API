@@ -4,6 +4,7 @@ using HotelListing.Api.Application.DTOs.Booking;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HotelListing.Api.Common.Models.Paging;
+using HotelListing.Api.Common.Models.Filtering;
 
 namespace HotelListing.Api.Controllers;
 
@@ -16,16 +17,18 @@ public class HotelBookingsController(IBookingService bookingService) : ApiContro
     [HotelOrSystemAdmin]
     public async Task<ActionResult<PageResult<GetBookingDto>>> GetBookingsAdmin(
         [FromRoute] int hotelId,
-        [FromQuery] PaginationParameters paginationParameters
+        [FromQuery] PaginationParameters paginationParameters,
+        [FromQuery] BookingFilterParameters filters
     ) =>
-        ToActionResult(await bookingService.GetBookingsForHotelAsync(hotelId, paginationParameters));
+        ToActionResult(await bookingService.GetBookingsForHotelAsync(hotelId, paginationParameters, filters));
 
     [HttpGet]
     public async Task<ActionResult<PageResult<GetBookingDto>>> GetBookings(
         [FromRoute] int hotelId,
-        [FromQuery] PaginationParameters paginationParameters
+        [FromQuery] PaginationParameters paginationParameters,
+        [FromQuery] BookingFilterParameters filters
     ) =>
-        ToActionResult(await bookingService.GetUserBookingsForHotelAsync(hotelId, paginationParameters));
+        ToActionResult(await bookingService.GetUserBookingsForHotelAsync(hotelId, paginationParameters, filters));
 
     [HttpPost]
     [Authorize]

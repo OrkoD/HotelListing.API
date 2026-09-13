@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Models.Extensions;
 using HotelListing.Api.Common.Enums;
+using HotelListing.Api.Common.Models.Filtering;
 
 namespace HotelListing.Api.Application.Services;
 
@@ -17,7 +18,8 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
 {
     public async Task<Result<PageResult<GetBookingDto>>> GetBookingsForHotelAsync(
         int hotelId,
-        PaginationParameters paginationParameters
+        PaginationParameters paginationParameters,
+        BookingFilterParameters filters
     )
     {
         var hotelExists = await db.Hotels.AnyAsync(h => h.Id == hotelId);
@@ -26,10 +28,9 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
             return Result<PageResult<GetBookingDto>>
                 .Failure(new Error(ErrorCodes.NotFound, $"Hotel {hotelId} was not found."));
 
-        var bookings = await db.Bookings
-            .AsNoTracking()
-            .Where(b => b.HotelId == hotelId)
-            .OrderBy(b => b.CheckIn)
+        var query = ApplyFilters(hotelId, filters);
+
+        var bookings = await query
             .ProjectTo<GetBookingDto>(mapper.ConfigurationProvider)
             .ToPageResultAsync(paginationParameters);
 
@@ -38,7 +39,8 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
 
     public async Task<Result<PageResult<GetBookingDto>>> GetUserBookingsForHotelAsync(
         int hotelId,
-        PaginationParameters paginationParameters
+        PaginationParameters paginationParameters,
+        BookingFilterParameters filters
     )
     {
         var userId = usersService.UserId;
@@ -48,10 +50,10 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
             return Result<PageResult<GetBookingDto>>
                 .Failure(new Error(ErrorCodes.NotFound, $"Hotel {hotelId} was not found."));
 
-        var bookings = await db.Bookings
-            .AsNoTracking()
-            .Where(b => b.HotelId == hotelId && b.UserId == userId)
-            .OrderBy(b => b.CheckIn)
+        var query = ApplyFilters(hotelId, filters);
+
+        var bookings = await query
+            .Where(b => b.UserId == userId)
             .ProjectTo<GetBookingDto>(mapper.ConfigurationProvider)
             .ToPageResultAsync(paginationParameters);
 
@@ -204,5 +206,54 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
                 && checkIn < b.CheckOut
                 && checkOut > b.CheckIn
             );
+    }
+
+    private IQueryable<Booking> ApplyFilters(int hotelId, BookingFilterParameters filters)
+    {
+        var query = db.Bookings.Where(b => b.HotelId == hotelId);
+
+        if (filters.Status.HasValue)
+            query = query.Where(b => b.Status == filters.Status);
+
+        if (filters.CheckInFrom.HasValue)
+            query = query.Where(b => b.CheckIn >= filters.CheckInFrom);
+
+        if (filters.CheckInTo.HasValue)
+            query = query.Where(b => b.CheckIn <= filters.CheckInTo);
+
+        if (filters.CheckOutFrom.HasValue)
+            query = query.Where(b => b.CheckOut >= filters.CheckOutFrom);
+
+        if (filters.CheckOutTo.HasValue)
+            query = query.Where(b => b.CheckOut <= filters.CheckOutTo);
+
+        if (filters.MinPrice.HasValue)
+            query = query.Where(b => b.TotalPrice >= filters.MinPrice);
+
+        if (filters.MaxPrice.HasValue)
+            query = query.Where(b => b.TotalPrice <= filters.MaxPrice);
+
+        if (filters.MinGuests.HasValue)
+            query = query.Where(b => b.Guests >= filters.MinGuests);
+
+        if (filters.MaxGuests.HasValue)
+            query = query.Where(b => b.Guests <= filters.MaxGuests);
+
+        if (filters.CreatedAfter.HasValue)
+            query = query.Where(b => b.CreatedAtUtc >= filters.CreatedAfter);
+
+        if (filters.CreatedBefore.HasValue)
+            query = query.Where(b => b.CreatedAtUtc <= filters.CreatedBefore);
+
+        query = filters.SortBy?.ToLower() switch
+        {
+            "checkin" => filters.SortDescending ? query.OrderByDescending(b => b.CheckIn) : query.OrderBy(b => b.CheckIn),
+            "checkout" => filters.SortDescending ? query.OrderByDescending(b => b.CheckOut) : query.OrderBy(b => b.CheckOut),
+            "price" => filters.SortDescending ? query.OrderByDescending(b => b.TotalPrice) : query.OrderBy(b => b.TotalPrice),
+            "created" => filters.SortDescending ? query.OrderByDescending(b => b.CreatedAtUtc) : query.OrderBy(b => b.CreatedAtUtc),
+            _ => query.OrderBy(b => b.CheckIn)
+        };
+
+        return query;
     }
 }

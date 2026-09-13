@@ -34,21 +34,35 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 4. Get All Bookings for Hotel (Admin Only - Default Pagination)
+### 4. Get User Bookings with Filters & Sorting (Status=Pending, SortBy=checkin)
+GET {{HostAddress}}/api/hotels/5/bookings?Status=Pending&SortBy=checkin&SortDescending=false&pageNumber=1&pageSize=10
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 5. Get All Bookings for Hotel (Admin Only - Default Pagination)
 GET {{HostAddress}}/api/hotels/5/bookings/admin
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 5. Get All Bookings for Hotel (Admin Only - Custom Pagination: page 1, size 5)
+### 6. Get All Bookings for Hotel (Admin Only - Custom Pagination: page 1, size 5)
 GET {{HostAddress}}/api/hotels/5/bookings/admin?pageNumber=1&pageSize=5
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 6. Update Booking
+### 7. Get All Bookings for Hotel (Admin Only - Filtered by Status, Price, Guests)
+GET {{HostAddress}}/api/hotels/5/bookings/admin?Status=Confirmed&MinGuests=2&SortBy=price&SortDescending=true&pageNumber=1&pageSize=10
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 8. Update Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
@@ -61,19 +75,19 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 7. Cancel Booking (User)
+### 9. Cancel Booking (User)
 PUT {{HostAddress}}/api/hotels/5/bookings/8/cancel
 Authorization: {{jwtToken}}
 
 ###
 
-### 8. Admin Cancel Booking
+### 10. Admin Cancel Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/cancel
 Authorization: {{jwtToken}}
 
 ###
 
-### 9. Admin Confirm Booking
+### 11. Admin Confirm Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/confirm
 Authorization: {{jwtToken}}
 
