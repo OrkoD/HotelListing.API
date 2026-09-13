@@ -5,11 +5,11 @@ using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Common.Results;
 using HotelListing.Api.Application.Contracts;
 using HotelListing.Api.Domain;
-using HotelListing.Api.Domain.Enums;
 using HotelListing.Api.Application.DTOs.Booking;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Models.Extensions;
+using HotelListing.Api.Common.Enums;
 
 namespace HotelListing.Api.Application.Services;
 

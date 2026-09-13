@@ -1,5 +1,5 @@
 using HotelListing.Api.Domain;
-using HotelListing.Api.Domain.Enums;
+using HotelListing.Api.Common.Enums;
 using HotelListing.Api.Application.DTOs.Hotel;
 
 namespace HotelListing.Api.Application.DTOs.Booking;
