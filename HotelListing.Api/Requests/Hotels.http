@@ -1,26 +1,33 @@
 @HostAddress = http://localhost:5268
 @json = application/json
-@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZmNkMTc4ODAtYzZhMi00MzkwLTg5NTctMjYyZmVlMTMxOWVhIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTA0ODcyMywiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.3J5mjBgAt8Kuc4dyQ5uCUsmqsJIQEeq1hJnOptwSlBM
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZDUzZjhmOWItMTg1MS00ODE4LTk5Y2UtZTZlYjIwZjQzMmUxIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTEyOTYxOSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.lDyXj77iUBRy9t67UBNbgQbTKdS0QXMw4-1d3z8SEaU
 
 ###############################################
 # HOTELS ENDPOINTS
 ###############################################
 
-### 1. Get All Hotels
+### 1. Get All Hotels (Default Pagination: page 1, size 10)
 GET {{HostAddress}}/api/hotels
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 2. Get Hotel By ID
+### 2. Get All Hotels (Custom Pagination: page 2, size 5)
+GET {{HostAddress}}/api/hotels?pageNumber=2&pageSize=5
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 3. Get Hotel By ID
 GET {{HostAddress}}/api/hotels/5
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 3. Create New Hotel (Linked to CountryId: 1)
+### 4. Create New Hotel (Linked to CountryId: 2 - Jamaica)
 POST {{HostAddress}}/api/hotels
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
@@ -29,12 +36,12 @@ Authorization: {{jwtToken}}
   "name": "Jewels Runaway Bay",
   "address": "Ocho Rios, Jamaica",
   "rating": 4.6,
-  "countryId": 3
+  "countryId": 2
 }
 
 ###
 
-### 4. Update Hotel
+### 5. Update Hotel
 PUT {{HostAddress}}/api/hotels/4
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
@@ -49,9 +56,8 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 5. Delete Hotel By ID
+### 6. Delete Hotel By ID
 DELETE {{HostAddress}}/api/hotels/1
 Authorization: {{jwtToken}}
 
 ###
-

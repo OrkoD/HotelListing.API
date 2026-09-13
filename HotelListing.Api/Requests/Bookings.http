@@ -13,55 +13,68 @@ Authorization: {{jwtToken}}
 
 {
   "hotelId": 5,
-  "checkIn": "2026-09-12",
-  "checkOut": "2026-09-15",
+  "checkIn": "2026-09-15",
+  "checkOut": "2026-09-18",
   "guests": 2
 }
 
 ###
 
-### 2. Get User Bookings for Hotel
+### 2. Get User Bookings for Hotel (Default Pagination)
 GET {{HostAddress}}/api/hotels/5/bookings
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 3. Get All Bookings for Hotel (Admin Only)
+### 3. Get User Bookings for Hotel (Custom Pagination: page 1, size 5)
+GET {{HostAddress}}/api/hotels/5/bookings?pageNumber=1&pageSize=5
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 4. Get All Bookings for Hotel (Admin Only - Default Pagination)
 GET {{HostAddress}}/api/hotels/5/bookings/admin
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 4. Update Booking
+### 5. Get All Bookings for Hotel (Admin Only - Custom Pagination: page 1, size 5)
+GET {{HostAddress}}/api/hotels/5/bookings/admin?pageNumber=1&pageSize=5
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 6. Update Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
 
 {
-  "checkIn": "2026-09-13",
-  "checkOut": "2026-09-16",
+  "checkIn": "2026-09-16",
+  "checkOut": "2026-09-19",
   "guests": 3
 }
 
 ###
 
-### 5. Cancel Booking (User)
+### 7. Cancel Booking (User)
 PUT {{HostAddress}}/api/hotels/5/bookings/8/cancel
 Authorization: {{jwtToken}}
 
 ###
 
-### 6. Admin Cancel Booking
+### 8. Admin Cancel Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/cancel
 Authorization: {{jwtToken}}
 
 ###
 
-### 7. Admin Confirm Booking
+### 9. Admin Confirm Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/confirm
 Authorization: {{jwtToken}}
 
 ###
-

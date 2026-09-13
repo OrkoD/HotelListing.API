@@ -1,26 +1,36 @@
 @HostAddress = http://localhost:5268
 @json = application/json
-@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZmNkMTc4ODAtYzZhMi00MzkwLTg5NTctMjYyZmVlMTMxOWVhIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTA0ODcyMywiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.3J5mjBgAt8Kuc4dyQ5uCUsmqsJIQEeq1hJnOptwSlBM
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiMTY3YzRiOGYtZDY2OS00Mzc1LWI2NGEtZDk4ZTlkOWQyZmE5IiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTI4ODQ5NCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.VdBY6SsJ5ISddtMtfn1WokFJQeJbEMh5A3afnGrykjs
 
 ###############################################
 # COUNTRIES ENDPOINTS
 ###############################################
 
-### 1. Get All Countries
+### 1. Get All Countries (Unpaginated list)
 GET {{HostAddress}}/api/countries
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 2. Get Country By ID
-GET {{HostAddress}}/api/countries/1
+@countryId = 2
+@pageNumber = 1
+@pageSize = 10
+### 3. Get Hotels for a Country (Custom Pagination: page 1, size 5)
+GET {{HostAddress}}/api/countries/{{countryId}}/hotels?pageNumber={{pageNumber}}&pageSize={{pageSize}}
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 3. Create New Country
+### 4. Get Country By ID
+GET {{HostAddress}}/api/countries/2
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 5. Create New Country (Admin Only)
 POST {{HostAddress}}/api/countries
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
@@ -32,20 +42,21 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 4. Update Country
+### 6. Update Country (Admin Only)
 PUT {{HostAddress}}/api/countries/1
 Content-Type: {{json}}
+Authorization: {{jwtToken}}
 
 {
   "id": 1,
-  "name": "Jamaica",
-  "shortName": "JM"
+  "name": "Ukraine",
+  "shortName": "UA"
 }
 
 ###
 
-### 5. Delete Country By ID
-DELETE {{HostAddress}}/api/countries/1
+### 7. Delete Country By ID (Admin Only)
+DELETE {{HostAddress}}/api/countries/1002
+Authorization: {{jwtToken}}
 
 ###
-
