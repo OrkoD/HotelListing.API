@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Application.DTOs.Hotel;
+using HotelListing.Api.Common.Models.Filtering;
 
 namespace HotelListing.Api.Controllers;
 
@@ -14,15 +15,16 @@ namespace HotelListing.Api.Controllers;
 public class CountriesController(ICountriesService countriesService) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries() =>
-        ToActionResult(await countriesService.GetCountriesAsync());
+    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries([FromQuery] CountryFilterParameters filters) =>
+        ToActionResult(await countriesService.GetCountriesAsync(filters));
 
     [HttpGet("{countryId:int}/hotels")]
-    public async Task<ActionResult<PageResult<GetHotelDto>>> GetCountryHotels(
+    public async Task<ActionResult<GetCountryHotelsDto>> GetCountryHotels(
         [FromRoute] int countryId,
-        [FromQuery] PaginationParameters paginationParameters
+        [FromQuery] PaginationParameters paginationParameters,
+        [FromQuery] HotelFilterParameters filters
     ) =>
-        ToActionResult(await countriesService.GetCountryHotelsAsync(countryId, paginationParameters));
+        ToActionResult(await countriesService.GetCountryHotelsAsync(countryId, paginationParameters, filters));
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<GetCountryDto>> GetCountry(int id) =>

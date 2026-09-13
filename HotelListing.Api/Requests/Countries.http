@@ -13,11 +13,18 @@ Authorization: {{jwtToken}}
 
 ###
 
+### 2. Get Filtered & Sorted Countries (Search=is, SortBy=name)
+GET {{HostAddress}}/api/countries?Search=is&SortBy=name&SortDescending=false
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
 @countryId = 2
 @pageNumber = 1
 @pageSize = 10
-### 3. Get Hotels for a Country (Custom Pagination: page 1, size 5)
-GET {{HostAddress}}/api/countries/{{countryId}}/hotels?pageNumber={{pageNumber}}&pageSize={{pageSize}}
+### 3. Get Hotels for a Country (Custom Pagination & Filters: MinRating=4.5, SortBy=rating)
+GET {{HostAddress}}/api/countries/{{countryId}}/hotels?pageNumber={{pageNumber}}&pageSize={{pageSize}}&MinRating=4.5&SortBy=rating&SortDescending=true
 Accept: {{json}}
 Authorization: {{jwtToken}}
 

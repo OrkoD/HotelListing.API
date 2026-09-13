@@ -8,18 +8,53 @@ using HotelListing.Api.Application.DTOs.Hotel;
 using Microsoft.EntityFrameworkCore;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Models.Extensions;
+using HotelListing.Api.Common.Models.Filtering;
 
 namespace HotelListing.Api.Application.Services;
 
 public class HotelsService(
-    HotelListingDbContext context,
+    HotelListingDbContext db,
     ICountriesService countriesService,
     IMapper mapper) : IHotelsService
 {
-    public async Task<Result<PageResult<GetHotelDto>>> GetHotelsAsync(PaginationParameters paginationParameters)
+    public async Task<Result<PageResult<GetHotelDto>>> GetHotelsAsync(
+        PaginationParameters paginationParameters,
+        HotelFilterParameters filters
+    )
     {
-        var hotels = await context.Hotels
-            .OrderBy(h => h.Id) 
+        var query = db.Hotels.AsQueryable();
+
+        if (filters.CountryId.HasValue)
+            query = query.Where(h => h.CountryId == filters.CountryId);
+
+        if (filters.MinRating.HasValue)
+            query = query.Where(h => h.Rating >= filters.MinRating);
+
+        if (filters.MaxRating.HasValue)
+            query = query.Where(h => h.Rating <= filters.MaxRating);
+
+        if (filters.MinPrice.HasValue)
+            query = query.Where(h => h.PerNightRate >= filters.MinPrice);
+
+        if (filters.MaxPrice.HasValue)
+            query = query.Where(h => h.PerNightRate <= filters.MaxPrice);
+
+        if (!string.IsNullOrWhiteSpace(filters.Location))
+            query = query.Where(h => h.Address.Contains(filters.Location));
+
+        if (!string.IsNullOrWhiteSpace(filters.Search))
+            query = query.Where(h => h.Name.Contains(filters.Search) || h.Address.Contains(filters.Search));
+
+        query = filters.SortBy?.ToLower() switch
+        {
+            "name" => filters.SortDescending ? query.OrderByDescending(h => h.Name) : query.OrderBy(h => h.Name),
+            "rating" => filters.SortDescending ? query.OrderByDescending(h => h.Rating) : query.OrderBy(h => h.Rating),
+            "price" => filters.SortDescending ? query.OrderByDescending(h => h.PerNightRate) : query.OrderBy(h => h.PerNightRate),
+            "address" => filters.SortDescending ? query.OrderByDescending(h => h.Address) : query.OrderBy(h => h.Address),
+            _ => query.OrderBy(h => h.Id)
+        };
+
+        var hotels = await query
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .ToPageResultAsync(paginationParameters);
 
@@ -28,7 +63,7 @@ public class HotelsService(
 
     public async Task<Result<GetHotelDto>> GetHotelAsync(int id)
     {
-        var hotel = await context.Hotels
+        var hotel = await db.Hotels
             .Where(h => h.Id == id)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
@@ -50,10 +85,10 @@ public class HotelsService(
             return Result<GetHotelDto>.Failure(new Error(ErrorCodes.Conflict, $"Hotel '{hotelDto.Name}' already exists in the selected country."));
 
         var hotel = mapper.Map<Hotel>(hotelDto);
-        await context.Hotels.AddAsync(hotel);
-        await context.SaveChangesAsync();
+        await db.Hotels.AddAsync(hotel);
+        await db.SaveChangesAsync();
 
-        var dto = await context.Hotels
+        var dto = await db.Hotels
             .Where(h => h.Id == hotel.Id)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .FirstAsync();
@@ -71,7 +106,7 @@ public class HotelsService(
         if (!countryExists)
             return Result.Failure(new Error(ErrorCodes.NotFound, $"Country '{hotel.CountryId}' was not found."));
 
-        var updated = await context.Hotels
+        var updated = await db.Hotels
             .Where(h => h.Id == id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(h => h.Name, hotel.Name)
@@ -86,7 +121,7 @@ public class HotelsService(
 
     public async Task<Result> DeleteHotelAsync(int id)
     {
-        var deleted = await context.Hotels
+        var deleted = await db.Hotels
             .Where(h => h.Id == id)
             .ExecuteDeleteAsync() > 0;
 
@@ -97,6 +132,6 @@ public class HotelsService(
 
     public async Task<bool> HotelExistsAsync(string name, int countryId)
     {
-        return await context.Hotels.AnyAsync(h => h.Name == name && h.CountryId == countryId);
+        return await db.Hotels.AnyAsync(h => h.Name == name && h.CountryId == countryId);
     }
 }

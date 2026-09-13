@@ -20,7 +20,14 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 3. Get Hotel By ID
+### 3. Get Filtered & Sorted Hotels (CountryId=2, MinRating=4.5, SortBy=rating desc)
+GET {{HostAddress}}/api/hotels?CountryId=2&MinRating=4.5&SortBy=rating&SortDescending=true&pageNumber=1&pageSize=10
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 4. Get Hotel By ID
 GET {{HostAddress}}/api/hotels/5
 Accept: {{json}}
 Authorization: {{jwtToken}}
