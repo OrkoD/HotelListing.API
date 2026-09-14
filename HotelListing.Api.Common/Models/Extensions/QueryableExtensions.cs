@@ -38,11 +38,21 @@ public static class QueryableExtensions
         };
     }
 
-    public static async Task<CursorPageResult<T>> ToCursorResultAsync<T>(
+    public static Task<CursorPageResult<T>> ToCursorResultAsync<T>(
         this IQueryable<T> source,
         CursorPaginationParameters parameters,
         CancellationToken cancellationToken = default
-    ) where T : class, IIdentifiable
+    ) where T : class, IIdentifiable =>
+        source.ToCursorResultAsync(parameters, q => q, cancellationToken);
+
+    public static async Task<CursorPageResult<TResult>> ToCursorResultAsync<TSource, TResult>(
+        this IQueryable<TSource> source,
+        CursorPaginationParameters parameters,
+        Func<IQueryable<TSource>, IQueryable<TResult>> project,
+        CancellationToken cancellationToken = default
+    )
+        where TSource : class, IIdentifiable
+        where TResult : class, IIdentifiable
     {
         var token = CursorToken.Decode(parameters.Cursor);
         var pageSize = parameters.PageSize;
@@ -61,7 +71,7 @@ public static class QueryableExtensions
             query = query.OrderBy(x => x.Id);
         }
 
-        var items = await query.Take(pageSize + 1).ToListAsync(cancellationToken);
+        var items = await project(query.Take(pageSize + 1)).ToListAsync(cancellationToken);
         var hasMore = items.Count > pageSize;
 
         if (hasMore)
@@ -73,7 +83,7 @@ public static class QueryableExtensions
         var hasNext = isBackward || hasMore;
         var hasPrevious = (!isBackward && token != null) || (isBackward && hasMore);
 
-        return new CursorPageResult<T>
+        return new CursorPageResult<TResult>
         {
             Data = items,
             Metadata = new CursorPaginationMetadata

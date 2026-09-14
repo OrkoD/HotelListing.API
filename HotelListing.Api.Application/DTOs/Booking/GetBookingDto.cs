@@ -1,6 +1,4 @@
-using HotelListing.Api.Domain;
-using HotelListing.Api.Common.Enums;
-using HotelListing.Api.Application.DTOs.Hotel;
+using HotelListing.Api.Common.Contracts;
 
 namespace HotelListing.Api.Application.DTOs.Booking;
 
@@ -15,4 +13,4 @@ public record GetBookingDto(
     string Status,
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc
-);
+) : IIdentifiable;

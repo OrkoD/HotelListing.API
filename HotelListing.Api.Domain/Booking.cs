@@ -1,8 +1,9 @@
 using HotelListing.Api.Common.Enums;
+using HotelListing.Api.Common.Contracts;
 
 namespace HotelListing.Api.Domain;
 
-public class Booking
+public class Booking : IIdentifiable
 {
     public int Id { get; set; }
 

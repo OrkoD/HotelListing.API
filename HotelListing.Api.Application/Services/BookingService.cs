@@ -16,17 +16,36 @@ namespace HotelListing.Api.Application.Services;
 
 public class BookingService(HotelListingDbContext db, IUsersService usersService, IMapper mapper) : IBookingService
 {
+    public async Task<Result<CursorPageResult<GetBookingDto>>> GetBookingsForHotelCursorAsync(
+        int hotelId,
+        CursorPaginationParameters parameters,
+        BookingFilterParameters filters,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (!await HotelExistsAsync(hotelId, cancellationToken))
+            return Result<CursorPageResult<GetBookingDto>>.NotFound($"Hotel {hotelId} was not found.");
+
+        var query = ApplyFilters(hotelId, filters);
+
+        var bookings = await query
+            .ToCursorResultAsync(
+                parameters,
+                q => q.ProjectTo<GetBookingDto>(mapper.ConfigurationProvider),
+                cancellationToken
+            );
+
+        return Result<CursorPageResult<GetBookingDto>>.Success(bookings);
+    }
+
     public async Task<Result<PageResult<GetBookingDto>>> GetBookingsForHotelAsync(
         int hotelId,
         PaginationParameters paginationParameters,
         BookingFilterParameters filters
     )
     {
-        var hotelExists = await db.Hotels.AnyAsync(h => h.Id == hotelId);
-
-        if (!hotelExists)
-            return Result<PageResult<GetBookingDto>>
-                .Failure(new Error(ErrorCodes.NotFound, $"Hotel {hotelId} was not found."));
+        if (!await HotelExistsAsync(hotelId))
+            return Result<PageResult<GetBookingDto>>.NotFound($"Hotel {hotelId} was not found.");
 
         var query = ApplyFilters(hotelId, filters);
 
@@ -44,11 +63,9 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
     )
     {
         var userId = usersService.UserId;
-        var hotelExists = await db.Hotels.AnyAsync(h => h.Id == hotelId);
 
-        if (!hotelExists)
-            return Result<PageResult<GetBookingDto>>
-                .Failure(new Error(ErrorCodes.NotFound, $"Hotel {hotelId} was not found."));
+        if (!await HotelExistsAsync(hotelId))
+            return Result<PageResult<GetBookingDto>>.NotFound($"Hotel {hotelId} was not found.");
 
         var query = ApplyFilters(hotelId, filters);
 
@@ -256,4 +273,7 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
 
         return query;
     }
+
+    private Task<bool> HotelExistsAsync(int hotelId, CancellationToken cancellationToken = default) =>
+        db.Hotels.AnyAsync(h => h.Id == hotelId, cancellationToken);
 }

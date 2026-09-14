@@ -13,6 +13,16 @@ namespace HotelListing.Api.Controllers;
 [Authorize]
 public class HotelBookingsController(IBookingService bookingService) : ApiControllerBase
 {
+    [HttpGet("admin/cursor")]
+    [HotelOrSystemAdmin]
+    public async Task<ActionResult<CursorPageResult<GetBookingDto>>> GetBookingsAdminCursor(
+        [FromRoute] int hotelId,
+        [FromQuery] CursorPaginationParameters paginationParameters,
+        [FromQuery] BookingFilterParameters filters,
+        CancellationToken cancellationToken
+    ) =>
+    ToActionResult(await bookingService.GetBookingsForHotelCursorAsync(hotelId, paginationParameters, filters, cancellationToken));
+
     [HttpGet("admin")]
     [HotelOrSystemAdmin]
     public async Task<ActionResult<PageResult<GetBookingDto>>> GetBookingsAdmin(

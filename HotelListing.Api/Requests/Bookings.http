@@ -1,6 +1,6 @@
 @HostAddress = http://localhost:5268
 @json = application/json
-@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZDUzZjhmOWItMTg1MS00ODE4LTk5Y2UtZTZlYjIwZjQzMmUxIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTEyOTYxOSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.lDyXj77iUBRy9t67UBNbgQbTKdS0QXMw4-1d3z8SEaU
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZDg1MGYxMGQtNTM4YS00NzYxLTk5YWEtY2M2YzU4MGQxNzgyIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTM4MjQ4OCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.leDh-HFB89lfNhCslrrTg_pp10yMRtrWsnDJOkBVkoQ
 
 ###############################################
 # HOTEL BOOKINGS ENDPOINTS (/api/hotels/{hotelId}/bookings)
@@ -12,10 +12,10 @@ Content-Type: {{json}}
 Authorization: {{jwtToken}}
 
 {
-  "hotelId": 5,
-  "checkIn": "2026-09-15",
-  "checkOut": "2026-09-18",
-  "guests": 2
+  "hotelId": 4,
+  "checkIn": "2026-09-29",
+  "checkOut": "2026-09-30",
+  "guests": 3
 }
 
 ###
@@ -42,27 +42,49 @@ Authorization: {{jwtToken}}
 ###
 
 ### 5. Get All Bookings for Hotel (Admin Only - Default Pagination)
-GET {{HostAddress}}/api/hotels/5/bookings/admin
+GET {{HostAddress}}/api/hotels/4/bookings/admin
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
 ### 6. Get All Bookings for Hotel (Admin Only - Custom Pagination: page 1, size 5)
-GET {{HostAddress}}/api/hotels/5/bookings/admin?pageNumber=1&pageSize=5
+GET {{HostAddress}}/api/hotels/4/bookings/admin?pageNumber=1&pageSize=5
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
 ### 7. Get All Bookings for Hotel (Admin Only - Filtered by Status, Price, Guests)
-GET {{HostAddress}}/api/hotels/5/bookings/admin?Status=Confirmed&MinGuests=2&SortBy=price&SortDescending=true&pageNumber=1&pageSize=10
+GET {{HostAddress}}/api/hotels/4/bookings/admin?Status=Confirmed&MinGuests=2&SortBy=price&SortDescending=true&pageNumber=1&pageSize=10
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
 ###
 
-### 8. Update Booking
+### 8. Get Bookings with Cursor Pagination (First Page: pageSize=3)
+GET {{HostAddress}}/api/hotels/4/bookings/admin/cursor?pageSize=3
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 9. Get Bookings with Cursor Pagination (Next Page using cursor token)
+# Replace cursor with the NextCursor token received from the previous request
+GET {{HostAddress}}/api/hotels/4/bookings/admin/cursor?cursor=eyJJZCI6MywiSXNCYWNrd2FyZCI6ZmFsc2V9&pageSize=3
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 10. Get Bookings with Cursor Pagination + Filters (Status=Confirmed)
+GET {{HostAddress}}/api/hotels/4/bookings/admin/cursor?Status=Confirmed&pageSize=3
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 11. Update Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8
 Content-Type: {{json}}
 Authorization: {{jwtToken}}
@@ -75,19 +97,19 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 9. Cancel Booking (User)
+### 12. Cancel Booking (User)
 PUT {{HostAddress}}/api/hotels/5/bookings/8/cancel
 Authorization: {{jwtToken}}
 
 ###
 
-### 10. Admin Cancel Booking
+### 13. Admin Cancel Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/cancel
 Authorization: {{jwtToken}}
 
 ###
 
-### 11. Admin Confirm Booking
+### 14. Admin Confirm Booking
 PUT {{HostAddress}}/api/hotels/5/bookings/8/admin/confirm
 Authorization: {{jwtToken}}
 

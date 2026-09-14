@@ -7,9 +7,24 @@ namespace HotelListing.Api.Application.Contracts;
 
 public interface IBookingService
 {
-    Task<Result<PageResult<GetBookingDto>>> GetBookingsForHotelAsync(int hotelId, PaginationParameters paginationParameters, BookingFilterParameters filters);
+    Task<Result<CursorPageResult<GetBookingDto>>> GetBookingsForHotelCursorAsync(
+        int hotelId,
+        CursorPaginationParameters parameters,
+        BookingFilterParameters filters,
+        CancellationToken cancellationToken = default
+    );
 
-    Task<Result<PageResult<GetBookingDto>>> GetUserBookingsForHotelAsync(int hotelId, PaginationParameters paginationParameters, BookingFilterParameters filters);
+    Task<Result<PageResult<GetBookingDto>>> GetBookingsForHotelAsync(
+        int hotelId,
+        PaginationParameters paginationParameters,
+        BookingFilterParameters filters
+    );
+
+    Task<Result<PageResult<GetBookingDto>>> GetUserBookingsForHotelAsync(
+        int hotelId,
+        PaginationParameters paginationParameters,
+        BookingFilterParameters filters
+    );
 
     Task<Result<GetBookingDto>> CreateBookingAsync(CreateBookingDto dto);
 
