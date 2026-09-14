@@ -6,6 +6,7 @@ using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Application.DTOs.Hotel;
 using HotelListing.Api.Common.Models.Filtering;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace HotelListing.Api.Controllers;
 
@@ -39,6 +40,11 @@ public class CountriesController(ICountriesService countriesService) : ApiContro
     [Authorize(Roles = RoleNames.Admin)]
     public async Task<IActionResult> UpdateCountry(int id, UpdateCountryDto country) =>
         ToActionResult(await countriesService.UpdateCountryAsync(id, country));
+
+    [HttpPatch("{id:int}")]
+    [Authorize(Roles = RoleNames.Admin)]
+    public async Task<IActionResult> PatchCountry(int id, [FromBody] JsonPatchDocument<UpdateCountryDto> patchDoc) =>
+        ToActionResult(await countriesService.PatchCountryAsync(id, patchDoc));
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = RoleNames.Admin)]

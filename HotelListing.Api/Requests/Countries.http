@@ -1,6 +1,6 @@
 @HostAddress = http://localhost:5268
 @json = application/json
-@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiMTY3YzRiOGYtZDY2OS00Mzc1LWI2NGEtZDk4ZTlkOWQyZmE5IiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTI4ODQ5NCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.VdBY6SsJ5ISddtMtfn1WokFJQeJbEMh5A3afnGrykjs
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiZjEyYTAzNTMtNmFmNi00ZjdmLWE0ZTgtOTQ4ZTc5NDRlNWE1IiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc4OTM5NDQ2MSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.Cs7Aq0Sm_7WP4K8nupNKAgA5xinugJP0ijqk8kbxolQ
 
 ###############################################
 # COUNTRIES ENDPOINTS
@@ -62,7 +62,22 @@ Authorization: {{jwtToken}}
 
 ###
 
-### 7. Delete Country By ID (Admin Only)
+### 7. Partially Update Country (PATCH - Admin Only)
+PATCH {{HostAddress}}/api/countries/1
+Content-Type: application/json-patch+json
+Authorization: {{jwtToken}}
+
+[
+  {
+    "op": "replace",
+    "path": "/shortName",
+    "value": "UA"
+  }
+]
+
+###
+
+### 8. Delete Country By ID (Admin Only)
 DELETE {{HostAddress}}/api/countries/1002
 Authorization: {{jwtToken}}
 

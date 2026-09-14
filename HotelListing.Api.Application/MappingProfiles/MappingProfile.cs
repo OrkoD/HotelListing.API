@@ -29,6 +29,10 @@ public class CountryMappingProfile : Profile
         CreateMap<Country, GetCountriesDto>()
             .ForCtorParam(nameof(GetCountriesDto.Id), cfg => cfg.MapFrom(s => s.CountryId));
         CreateMap<CreateCountryDto, Country>();
+        CreateMap<Country, UpdateCountryDto>()
+            .ForMember(d => d.Id, opt => opt.MapFrom(s => s.CountryId))
+            .ReverseMap()
+            .ForMember(d => d.CountryId, opt => opt.MapFrom(s => s.Id));
     }
 }
 
