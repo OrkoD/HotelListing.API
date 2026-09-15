@@ -15,12 +15,32 @@ using HotelListing.Api.Common.Models.Config;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContextPool<HotelListingDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString"), sqlOptions =>
+    {
+        sqlOptions.CommandTimeout(30);
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorNumbersToAdd: null
+        );
+    });
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+},
+    poolSize: 128
+);
+
 builder.Services.AddControllers()
     .AddNewtonsoftJson()
     .AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<HotelListingDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString")));
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<HotelListingDbContext>();
