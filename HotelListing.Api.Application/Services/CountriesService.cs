@@ -18,7 +18,7 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
 {
     public async Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync(CountryFilterParameters filters)
     {
-        var query = db.Countries.AsQueryable();
+        var query = db.Countries.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(filters.Search))
         {
@@ -54,13 +54,14 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
             return Result<GetCountryHotelsDto>.NotFound($"Country '{countryId}' was not found.");
 
         var countryName = await db.Countries
+            .AsNoTracking()
             .Where(c => c.CountryId == countryId)
             .Select(c => c.Name)
             .SingleAsync();
 
         var hotelsQuery = db.Hotels
-            .Where(h => h.CountryId == countryId)
-            .AsQueryable();
+            .AsNoTracking()
+            .Where(h => h.CountryId == countryId);
 
         if (filters.MinRating.HasValue)
             hotelsQuery = hotelsQuery.Where(h => h.Rating >= filters.MinRating);
@@ -109,6 +110,7 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
     public async Task<Result<GetCountryDto>> GetCountryAsync(int id)
     {
         var country = await db.Countries
+            .AsNoTracking()
             .Where(c => c.CountryId == id)
             .ProjectTo<GetCountryDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();

@@ -227,7 +227,7 @@ public class BookingService(HotelListingDbContext db, IUsersService usersService
 
     private IQueryable<Booking> ApplyFilters(int hotelId, BookingFilterParameters filters)
     {
-        var query = db.Bookings.Where(b => b.HotelId == hotelId);
+        var query = db.Bookings.AsNoTracking().Where(b => b.HotelId == hotelId);
 
         if (filters.Status.HasValue)
             query = query.Where(b => b.Status == filters.Status);

@@ -22,7 +22,7 @@ public class HotelsService(
         HotelFilterParameters filters
     )
     {
-        var query = db.Hotels.AsQueryable();
+        var query = db.Hotels.AsNoTracking();
 
         if (filters.CountryId.HasValue)
             query = query.Where(h => h.CountryId == filters.CountryId);
@@ -64,6 +64,7 @@ public class HotelsService(
     public async Task<Result<GetHotelDto>> GetHotelAsync(int id)
     {
         var hotel = await db.Hotels
+            .AsNoTracking()
             .Where(h => h.Id == id)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
@@ -89,6 +90,7 @@ public class HotelsService(
         await db.SaveChangesAsync();
 
         var dto = await db.Hotels
+            .AsNoTracking()
             .Where(h => h.Id == hotel.Id)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .FirstAsync();
