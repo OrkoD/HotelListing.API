@@ -17,10 +17,13 @@ namespace HotelListing.Api.Application.Services;
 
 public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryCache cache) : ICountriesService
 {
+    private const string CountryListCacheName = "countries_list_";
+    private const string CountrySingleCacheName = "country_";
+
     public async Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync(CountryFilterParameters filters)
     {
         var searchTerm = filters?.Search?.Trim().ToLowerInvariant() ?? string.Empty;
-        var cacheKey = $"countries_list_{searchTerm}";
+        var cacheKey = $"{CountryListCacheName}{searchTerm}";
 
         if (!cache.TryGetValue(cacheKey, out IEnumerable<GetCountriesDto>? countries))
         {
@@ -124,7 +127,7 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryC
     public async Task<Result<GetCountryDto>> GetCountryAsync(int id)
     {
         // Check the cache
-        var cacheKey = $"country_{id}";
+        var cacheKey = $"{CountrySingleCacheName}{id}";
 
         if (!cache.TryGetValue(cacheKey, out GetCountryDto? country))
         {
@@ -165,6 +168,7 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryC
             await db.SaveChangesAsync();
 
             var dto = mapper.Map<GetCountryDto>(country);
+            InvalidateCountryCache(country.CountryId);
 
             return Result<GetCountryDto>.Success(dto);
         }
@@ -188,6 +192,9 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryC
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.Name, country.Name)
                 .SetProperty(c => c.ShortName, country.ShortName));
+
+        if (updated > 0)
+            InvalidateCountryCache(id);
 
         return updated > 0
             ? Result.Success()
@@ -220,6 +227,8 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryC
         mapper.Map(countryDto, country);
         await db.SaveChangesAsync();
 
+        InvalidateCountryCache(id);
+
         return Result.Success();
     }
 
@@ -228,6 +237,9 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryC
         var deleted = await db.Countries
             .Where(c => c.CountryId == id)
             .ExecuteDeleteAsync();
+
+        if (deleted > 0)
+            InvalidateCountryCache(id);
 
         return deleted > 0
             ? Result.Success()
@@ -241,4 +253,10 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper, IMemoryC
         await db.Countries.AnyAsync(c =>
             c.Name.ToLower().Trim() == name.ToLower().Trim() &&
             (!excludeId.HasValue || c.CountryId != excludeId.Value));
+
+    private void InvalidateCountryCache(int id)
+    {
+        cache.Remove($"{CountrySingleCacheName}{id}");
+        cache.Remove($"{CountryListCacheName}");
+    }
 }
