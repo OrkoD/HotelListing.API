@@ -127,7 +127,8 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
             var exists = await CountryExistsAsync(countryDto.Name);
 
             if (exists)
-                return Result<GetCountryDto>.Failure(new Error(ErrorCodes.Conflict, $"Country with name '{countryDto.Name}' already exists"));
+                return Result<GetCountryDto>
+                    .Failure(new Error(ErrorCodes.Conflict, $"Country with name '{countryDto.Name}' already exists"));
 
             var country = mapper.Map<Country>(countryDto);
 
@@ -180,8 +181,9 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
         if (countryDto.Id != id)
             return Result.BadRequest(new Error(ErrorCodes.Validation, "Cannot modify the Id field."));
 
+        var normalizedName = countryDto.Name.ToLower().Trim();
         var duplicateExists = await db.Countries
-            .AnyAsync(c => c.Name.ToLower().Trim() == countryDto.Name.ToLower().Trim() && c.CountryId != id);
+            .AnyAsync(c => c.Name.ToLower().Trim() == normalizedName && c.CountryId != id);
 
         if (duplicateExists)
             return Result.Failure(new Error(ErrorCodes.Conflict, $"Country with name '{countryDto.Name}' already exists."));

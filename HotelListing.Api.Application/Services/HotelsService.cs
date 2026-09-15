@@ -40,10 +40,10 @@ public class HotelsService(
             query = query.Where(h => h.PerNightRate <= filters.MaxPrice);
 
         if (!string.IsNullOrWhiteSpace(filters.Location))
-            query = query.Where(h => h.Address.Contains(filters.Location));
+            query = query.Where(h => h.Address.Contains(filters.Location.Trim()));
 
         if (!string.IsNullOrWhiteSpace(filters.Search))
-            query = query.Where(h => h.Name.Contains(filters.Search) || h.Address.Contains(filters.Search));
+            query = query.Where(h => h.Name.Contains(filters.Search.Trim()) || h.Address.Contains(filters.Search.Trim()));
 
         query = filters.SortBy?.ToLower() switch
         {
@@ -89,11 +89,7 @@ public class HotelsService(
         await db.Hotels.AddAsync(hotel);
         await db.SaveChangesAsync();
 
-        var dto = await db.Hotels
-            .AsNoTracking()
-            .Where(h => h.Id == hotel.Id)
-            .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
-            .FirstAsync();
+        var dto = mapper.Map<GetHotelDto>(hotel);
 
         return Result<GetHotelDto>.Success(dto);
     }
@@ -134,6 +130,7 @@ public class HotelsService(
 
     public async Task<bool> HotelExistsAsync(string name, int countryId)
     {
-        return await db.Hotels.AnyAsync(h => h.Name == name && h.CountryId == countryId);
+        var normalizedName = name.ToLower().Trim();
+        return await db.Hotels.AnyAsync(h => h.Name.ToLower().Trim() == normalizedName && h.CountryId == countryId);
     }
 }

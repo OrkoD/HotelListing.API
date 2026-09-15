@@ -18,12 +18,21 @@ public class HotelConfiguration : IEntityTypeConfiguration<Hotel>
         builder.Property(h => h.PerNightRate)
             .HasColumnType("decimal(18,2)");
 
-        // Prevent duplicate hotel names within the same country and optimize HotelExists check
+        // 1. Data Integrity + Fast Duplicate Check (Unique composite)
         builder.HasIndex(h => new { h.CountryId, h.Name })
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("IX_Hotels_CountryId_Name_Unique");
 
-        // Support sorting and filtering by Rating and Price
-        builder.HasIndex(h => h.Rating);
-        builder.HasIndex(h => h.PerNightRate);
+        // 2. Optimized for GET /api/countries/{id}/hotels (Filtered/Sorted by rating)
+        builder.HasIndex(h => new { h.CountryId, h.Rating })
+            .HasDatabaseName("IX_Hotels_CountryId_Rating");
+
+        // 3. Optimized for global Price filtering & sorting (MinPrice / MaxPrice / SortBy=price)
+        builder.HasIndex(h => h.PerNightRate)
+            .HasDatabaseName("IX_Hotels_PerNightRate");
+
+        // 4. Optimized for global Name sorting / searching
+        builder.HasIndex(h => h.Name)
+            .HasDatabaseName("IX_Hotels_Name");
     }
 }

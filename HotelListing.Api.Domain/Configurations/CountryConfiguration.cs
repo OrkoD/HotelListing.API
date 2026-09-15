@@ -16,9 +16,11 @@ public class CountryConfiguration : IEntityTypeConfiguration<Country>
             .IsRequired();
 
         builder.HasIndex(c => c.Name)
+            .HasDatabaseName("IX_Countries_Name")
             .IsUnique();
 
-        builder.HasIndex(c => c.ShortName);
+        builder.HasIndex(c => c.ShortName)
+            .HasDatabaseName("IX_Countries_ShortName")
+            .IsUnique();
     }
 }
-
