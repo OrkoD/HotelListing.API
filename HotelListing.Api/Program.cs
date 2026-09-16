@@ -12,6 +12,9 @@ using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Application.MappingProfiles;
 using HotelListing.Api.Common.Models.Config;
 using HotelListing.Api.CachePolicies;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,12 +86,76 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(HotelMappingProfile).Assembly));
 
 // builder.Services.AddMemoryCache();
+
 builder.Services.AddOutputCache(options =>
 {
     options.AddPolicy(CacheConstants.AuthenticatedUserCachingPolicy, builder =>
     {
         builder.AddPolicy<AuthenticatedUserCachingPolicy>().SetCacheKeyPrefix(CacheConstants.AuthenticatedUserCachingPolicyTag);
     }, true);
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    // Fixed Window
+    // Use when: simplicity matters more than precision, or traffic is naturally not adversarial
+    options.AddFixedWindowLimiter(RateLimitingConstants.FixedPolicy, opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 50;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 5;
+    });
+
+    // Sliding Window
+    options.AddPolicy(RateLimitingConstants.PerUserPolicy, context =>
+    {
+        var username = context.User?.FindFirst(ClaimTypes.Email)?.Value
+                    ?? context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? context.User?.Identity?.Name
+                    ?? RateLimitingConstants.AnonymousUser;
+
+        return RateLimitPartition.GetSlidingWindowLimiter(username, _ => new SlidingWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = 50,
+            SegmentsPerWindow = 6,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 3
+        });
+    });
+
+    // Global rate limit by IP
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? RateLimitingConstants.UnknownIp;
+
+        return RateLimitPartition.GetFixedWindowLimiter(ipAddress, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = 200,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 10
+        });
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+            context.HttpContext.Response.Headers.RetryAfter = retryAfter.TotalSeconds.ToString();
+
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "Too many requests",
+            message = "Rate limit exceeded. Please try again later.",
+            retryAfter = retryAfter.TotalSeconds
+        }, cancellationToken: cancellationToken);
+    };
 });
 
 var app = builder.Build();
@@ -107,9 +174,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
+
+app.UseRateLimiter();
+
 app.UseOutputCache();
 
 app.MapControllers();
 
 app.Run();
+
+// TODO:
+// 1. Redis
+// 2. Implement loading doc and parsing

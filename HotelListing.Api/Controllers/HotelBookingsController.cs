@@ -5,12 +5,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Models.Filtering;
+using Microsoft.AspNetCore.RateLimiting;
+using HotelListing.Api.Common.Constants;
 
 namespace HotelListing.Api.Controllers;
 
 [ApiController]
 [Route("api/hotels/{hotelId:int}/bookings")]
 [Authorize]
+[EnableRateLimiting(RateLimitingConstants.PerUserPolicy)]
 public class HotelBookingsController(IBookingService bookingService) : ApiControllerBase
 {
     [HttpGet("admin/cursor")]
