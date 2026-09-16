@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Application.MappingProfiles;
 using HotelListing.Api.Common.Models.Config;
+using HotelListing.Api.CachePolicies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,7 +82,14 @@ builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(HotelMappingProfile).Assembly));
 
-builder.Services.AddMemoryCache();
+// builder.Services.AddMemoryCache();
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy(CacheConstants.AuthenticatedUserCachingPolicy, builder =>
+    {
+        builder.AddPolicy<AuthenticatedUserCachingPolicy>().SetCacheKeyPrefix(CacheConstants.AuthenticatedUserCachingPolicyTag);
+    }, true);
+});
 
 var app = builder.Build();
 
@@ -100,6 +108,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOutputCache();
 
 app.MapControllers();
 

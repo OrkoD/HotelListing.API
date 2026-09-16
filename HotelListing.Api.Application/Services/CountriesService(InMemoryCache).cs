@@ -11,33 +11,50 @@ using HotelListing.Api.Common.Models.Extensions;
 using HotelListing.Api.Application.DTOs.Hotel;
 using HotelListing.Api.Common.Models.Filtering;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HotelListing.Api.Application.Services;
 
-public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICountriesService
+public class CountriesServiceInMemoryCache(HotelListingDbContext db, IMapper mapper, IMemoryCache cache) : ICountriesService
 {
+    private const string CountryListCacheName = "countries_list_";
+    private const string CountrySingleCacheName = "country_";
+
     public async Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync(CountryFilterParameters filters)
     {
-        var query = db.Countries.AsNoTracking();
+        var searchTerm = filters?.Search?.Trim().ToLowerInvariant() ?? string.Empty;
+        var cacheKey = $"{CountryListCacheName}{searchTerm}";
 
-        if (!string.IsNullOrWhiteSpace(filters.Search))
+        if (!cache.TryGetValue(cacheKey, out IEnumerable<GetCountriesDto>? countries))
         {
-            var term = filters.Search.Trim();
-            query = query.Where(c => c.Name.Contains(term) || c.ShortName.Contains(term));
+            var query = db.Countries.AsNoTracking();
 
-            // query = query.Where(c => EF.Functions.Like(c.Name, $"%{term}%") || EF.Functions.Like(c.ShortName, $"%{term}%"));
+            if (!string.IsNullOrWhiteSpace(filters?.Search))
+            {
+                var term = filters.Search.Trim();
+                query = query.Where(c => c.Name.Contains(term) || c.ShortName.Contains(term));
+            }
+
+            // TODO: commented out for now
+            // query = filters.SortBy?.ToLower() switch
+            // {
+            //     "name" => filters.SortDescending ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
+            //     "shortname" => filters.SortDescending ? query.OrderByDescending(c => c.ShortName) : query.OrderBy(c => c.ShortName),
+            //     _ => query.OrderBy(c => c.Name)
+            // };
+
+            countries = await query
+                .ProjectTo<GetCountriesDto>(mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromMinutes(5))
+                .SetAbsoluteExpiration(TimeSpan.FromDays(1));
+
+            cache.Set(cacheKey, countries, cacheOptions);
         }
 
-        query = filters.SortBy?.ToLower() switch
-        {
-            "name" => filters.SortDescending ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
-            "shortname" => filters.SortDescending ? query.OrderByDescending(c => c.ShortName) : query.OrderBy(c => c.ShortName),
-            _ => query.OrderBy(c => c.Name)
-        };
-
-        var countries = await query
-            .ProjectTo<GetCountriesDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+        countries ??= [];
 
         return Result<IEnumerable<GetCountriesDto>>.Success(countries);
     }
@@ -109,11 +126,26 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
 
     public async Task<Result<GetCountryDto>> GetCountryAsync(int id)
     {
-        var country = await db.Countries
-            .AsNoTracking()
-            .Where(c => c.CountryId == id)
-            .ProjectTo<GetCountryDto>(mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync();
+        // Check the cache
+        var cacheKey = $"{CountrySingleCacheName}{id}";
+
+        if (!cache.TryGetValue(cacheKey, out GetCountryDto? country))
+        {
+            country = await db.Countries
+                .AsNoTracking()
+                .Where(c => c.CountryId == id)
+                .ProjectTo<GetCountryDto>(mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            if (country is not null)
+            {
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5))
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+                cache.Set(cacheKey, country, cacheOptions);
+            }
+        }
 
         return country is null
             ? Result<GetCountryDto>.NotFound()
@@ -136,6 +168,7 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
             await db.SaveChangesAsync();
 
             var dto = mapper.Map<GetCountryDto>(country);
+            InvalidateCountryCache(country.CountryId);
 
             return Result<GetCountryDto>.Success(dto);
         }
@@ -159,6 +192,9 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.Name, country.Name)
                 .SetProperty(c => c.ShortName, country.ShortName));
+
+        if (updated > 0)
+            InvalidateCountryCache(id);
 
         return updated > 0
             ? Result.Success()
@@ -191,6 +227,8 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
         mapper.Map(countryDto, country);
         await db.SaveChangesAsync();
 
+        InvalidateCountryCache(id);
+
         return Result.Success();
     }
 
@@ -199,6 +237,9 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
         var deleted = await db.Countries
             .Where(c => c.CountryId == id)
             .ExecuteDeleteAsync();
+
+        if (deleted > 0)
+            InvalidateCountryCache(id);
 
         return deleted > 0
             ? Result.Success()
@@ -212,4 +253,10 @@ public class CountriesService(HotelListingDbContext db, IMapper mapper) : ICount
         await db.Countries.AnyAsync(c =>
             c.Name.ToLower().Trim() == name.ToLower().Trim() &&
             (!excludeId.HasValue || c.CountryId != excludeId.Value));
+
+    private void InvalidateCountryCache(int id)
+    {
+        cache.Remove($"{CountrySingleCacheName}{id}");
+        cache.Remove($"{CountryListCacheName}");
+    }
 }
