@@ -1,24 +1,25 @@
-using HotelListing.Api.Domain;
-using HotelListing.Api.Application.Contracts;
-using Microsoft.EntityFrameworkCore;
-using HotelListing.Api.Application.Services;
-using Microsoft.AspNetCore.Authentication;
-using HotelListing.Api.Handlers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
-using HotelListing.Api.Common.Constants;
-using HotelListing.Api.Application.MappingProfiles;
-using HotelListing.Api.Common.Models.Config;
-using HotelListing.Api.CachePolicies;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using HotelListing.Api.Application.Contracts;
+using HotelListing.Api.Application.MappingProfiles;
+using HotelListing.Api.Application.Services;
+using HotelListing.Api.CachePolicies;
+using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Common.Models.Config;
+using HotelListing.Api.Domain;
+using HotelListing.Api.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. DATABASE & PERSISTENCE
 builder.Services.AddDbContextPool<HotelListingDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("HotelListingDbConnectionString"), sqlOptions =>
@@ -36,22 +37,17 @@ builder.Services.AddDbContextPool<HotelListingDbContext>(options =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
-},
-    poolSize: 128
-);
+}, poolSize: 128);
 
-builder.Services.AddControllers()
-    .AddNewtonsoftJson()
-    .AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
-
-builder.Services.AddOpenApi();
+// 2. IDENTITY & USER STORE
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<HotelListingDbContext>();
 
-builder.Services.AddHttpContextAccessor();
+// 3. AUTHENTICATION & AUTHORIZATION
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
+    ?? throw new InvalidOperationException("JwtSettings section is missing from configuration.");
 
 if (string.IsNullOrWhiteSpace(jwtSettings.Key))
     throw new InvalidOperationException("JwtSettings:Key is not configured.");
@@ -62,43 +58,46 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-        ClockSkew = TimeSpan.Zero // Default is 5 min
-    })
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(AuthenticationDefaults.BasicScheme, _ => { })
-    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(AuthenticationDefaults.ApiKeyScheme, _ => { });
+.AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+{
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = jwtSettings.Issuer,
+    ValidAudience = jwtSettings.Audience,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+    ClockSkew = TimeSpan.Zero
+})
+.AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(AuthenticationDefaults.BasicScheme, _ => { })
+.AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(AuthenticationDefaults.ApiKeyScheme, _ => { });
 
 builder.Services.AddAuthorization();
+
+// 4. APPLICATION & INFRASTRUCTURE SERVICES
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(HotelMappingProfile).Assembly));
 
 builder.Services.AddScoped<ICountriesService, CountriesService>();
 builder.Services.AddScoped<IHotelsService, HotelsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(HotelMappingProfile).Assembly));
+builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
 
-// builder.Services.AddMemoryCache();
-
+// 5. CACHING STRATEGY
 builder.Services.AddOutputCache(options =>
 {
-    options.AddPolicy(CacheConstants.AuthenticatedUserCachingPolicy, builder =>
+    options.AddPolicy(CacheConstants.AuthenticatedUserCachingPolicy, policyBuilder =>
     {
-        builder.AddPolicy<AuthenticatedUserCachingPolicy>().SetCacheKeyPrefix(CacheConstants.AuthenticatedUserCachingPolicyTag);
-    }, true);
+        policyBuilder.AddPolicy<AuthenticatedUserCachingPolicy>()
+                     .SetCacheKeyPrefix(CacheConstants.AuthenticatedUserCachingPolicyTag);
+    }, excludeDefaultPolicy: true);
 });
 
+// 6. RATE LIMITING STRATEGY
 builder.Services.AddRateLimiter(options =>
 {
-    // Fixed Window
-    // Use when: simplicity matters more than precision, or traffic is naturally not adversarial
+    // A. Fixed Window Policy (for simple endpoints)
     options.AddFixedWindowLimiter(RateLimitingConstants.FixedPolicy, opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
@@ -107,7 +106,7 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 5;
     });
 
-    // Sliding Window
+    // B. Sliding Window Policy (per authenticated user)
     options.AddPolicy(RateLimitingConstants.PerUserPolicy, context =>
     {
         var username = context.User?.FindFirst(ClaimTypes.Email)?.Value
@@ -125,7 +124,7 @@ builder.Services.AddRateLimiter(options =>
         });
     });
 
-    // Global rate limit by IP
+    // C. Global Limiter (per client IP address)
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
     {
         var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? RateLimitingConstants.UnknownIp;
@@ -158,10 +157,16 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
+// 7. CONTROLLERS & API SPECIFICATION
+builder.Services.AddControllers()
+    .AddNewtonsoftJson()
+    .AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+
+builder.Services.AddOpenApi();
+
+// APPLICATION PIPELINE (MIDDLEWARE)
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -173,18 +178,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Authentication MUST precede Authorization and RateLimiter (to populate context.User)
 app.UseAuthentication();
-
 app.UseAuthorization();
 
+// Rate limiting and Output caching
 app.UseRateLimiter();
-
 app.UseOutputCache();
 
 app.MapControllers();
 
 app.Run();
-
-// TODO:
-// 1. Redis
-// 2. Implement loading doc and parsing
