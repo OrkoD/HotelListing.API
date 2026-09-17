@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using HotelListing.Api.Common.Models.Config;
+using Microsoft.Extensions.Logging;
 
 namespace HotelListing.Api.Application.Services;
 
@@ -19,7 +20,8 @@ public class UsersService(
     UserManager<ApplicationUser> userManager,
     IOptions<JwtSettings> jwtOptions,
     IHttpContextAccessor httpContextAccessor,
-    HotelListingDbContext db
+    HotelListingDbContext db,
+    ILogger<UsersService> logger
 ) : IUsersService
 {
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
@@ -46,6 +48,10 @@ public class UsersService(
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select(e => new Error(ErrorCodes.BadRequest, e.Description)).ToArray();
+            logger.LogError(
+                "User registration failed for {Email}: {Errors}",
+                registerUserDto.Email,
+                string.Join(", ", errors));
             return Result<RegisteredUserDto>.BadRequest(errors);
         }
 
@@ -78,7 +84,10 @@ public class UsersService(
         var user = await userManager.FindByEmailAsync(loginUserDto.Email);
 
         if (user is null)
+        {
+            logger.LogWarning("Failed login attempt for email: {Email}", loginUserDto.Email);
             return Result<string>.Failure(new Error(ErrorCodes.BadRequest, "Invalid credentials."));
+        }
 
         var isPasswordValid = await userManager.CheckPasswordAsync(user, loginUserDto.Password);
 
