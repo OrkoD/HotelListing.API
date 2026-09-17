@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -18,6 +17,8 @@ using HotelListing.Api.Domain;
 using HotelListing.Api.Handlers;
 using Serilog;
 using Serilog.Events;
+using Serilog.Extensions.Hosting;
+using HotelListing.Api.Middleware;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -109,6 +110,8 @@ try
     builder.Services.AddScoped<IUsersService, UsersService>();
     builder.Services.AddScoped<IBookingService, BookingService>();
     builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
 
     // 5. CACHING STRATEGY
     builder.Services.AddOutputCache(options =>
@@ -193,6 +196,8 @@ try
     // APPLICATION PIPELINE (MIDDLEWARE)
     var app = builder.Build();
 
+    app.UseExceptionHandler();
+
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
@@ -207,6 +212,38 @@ try
     // Authentication MUST precede Authorization and RateLimiter (to populate context.User)
     app.UseAuthentication();
     app.UseAuthorization();
+
+    // Serilog’s HTTP Request Logging Middleware.
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
+
+        options.GetLevel = (httpContext, elapsed, ex) => ex != null
+            ? LogEventLevel.Error
+            : httpContext.Response.StatusCode >= 500
+                ? LogEventLevel.Error
+                : httpContext.Response.StatusCode >= 400
+                    ? LogEventLevel.Warning
+                    : LogEventLevel.Information;
+
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            var username = httpContext.User?.Identity?.Name
+                        ?? httpContext.User?.FindFirst(ClaimTypes.Email)?.Value
+                        ?? "anonymous";
+
+            diagnosticContext.Set("Username", username);
+            diagnosticContext.Set("RemoteIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+
+            if (httpContext.User?.Identity?.IsAuthenticated == true)
+            {
+                var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? httpContext.User.FindFirst("sub")?.Value
+                    ?? "unknown";
+                diagnosticContext.Set("UserId", userId);
+            }
+        };
+    });
 
     // Rate limiting and Output caching
     app.UseRateLimiter();
