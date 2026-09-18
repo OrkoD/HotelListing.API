@@ -22,6 +22,11 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
 using Asp.Versioning;
+using System.Reflection;
+using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.Extensions.DependencyInjection;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -214,6 +219,86 @@ try
             options.SubstituteApiVersionInUrl = true;
         });
 
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        // API Information
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "Hotel Listing API",
+            Version = "v1",
+            Description = "API for managing hotels, countries, and bookings",
+            Contact = new OpenApiContact
+            {
+                Name = "Support Team",
+                Email = "support@hotellisting.com",
+            },
+            License = new OpenApiLicense
+            {
+                Name = "MIT License",
+                Url = new Uri("https://opensource.org/licenses/MIT"),
+            }
+        });
+
+        options.SwaggerDoc("v2", new OpenApiInfo
+        {
+            Title = "Hotel Listing API V2",
+            Version = "v2",
+            Description = "Version 2 of the API for managing hotels, countries, and bookings",
+        });
+
+        // Include XML comments
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+        if (File.Exists(xmlPath))
+            options.IncludeXmlComments(xmlPath);
+
+        // Enable annotations
+        options.EnableAnnotations();
+
+        // Security Definitions
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization header using the Bearer scheme. Enter your token below.",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT"
+        });
+
+        // API Key Authentication
+        options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+        {
+            Description = "API Key needed to access the API. X-API-Key: {API Key}",
+            Name = "X-API-Key",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+        });
+
+        // Basic Authentication
+        options.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+        {
+            Description = "Basic Authentication using the Basic scheme",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "Basic"
+        });
+
+        // Add operation filters for examples
+        options.ExampleFilters();
+
+        // Custom operation filter for handling multiple authentication schemes
+        options.OperationFilter<SecurityRequirementsOperationFilter>(true, "Bearer");
+
+        // Order action by method
+        options.OrderActionsBy(api => $"{api.RelativePath}_{api.HttpMethod}");
+    });
+
+    builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+
     // APPLICATION PIPELINE (MIDDLEWARE)
     var app = builder.Build();
 
@@ -222,9 +307,19 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
+        app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/openapi/v1.json", "HotelListing.Api v1");
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Hotel Listing API v1");
+            options.SwaggerEndpoint("/swagger/v2/swagger.json", "Hotel Listing API v2");
+            options.RoutePrefix = "swagger";
+            options.DocumentTitle = "Hotel Listing API Documentation";
+            options.DisplayRequestDuration();
+            options.EnableDeepLinking();
+            options.EnableFilter();
+            options.ShowExtensions();
+            options.EnableValidator();
+            options.EnablePersistAuthorization();
         });
     }
 

@@ -21,6 +21,7 @@ bld/
 [Ll]og/
 [Ll]ogs/
 BenchmarkDotNet.Artifacts/
+.nuget/
 
 ## User-specific files
 *.rsuser
