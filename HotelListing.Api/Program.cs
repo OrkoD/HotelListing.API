@@ -21,6 +21,7 @@ using HotelListing.Api.Middleware;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using Asp.Versioning;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -198,6 +199,20 @@ try
     builder.Services.AddHealthChecks()
         .AddCheck("self", () => HealthCheckResult.Healthy("Application is running"), tags: ["api"])
         .AddDbContextCheck<HotelListingDbContext>("database", tags: ["db", "sql"]);
+
+    builder.Services.AddApiVersioning(options =>
+    {
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.DefaultApiVersion = new ApiVersion(1, 0);
+        options.ReportApiVersions = true;
+        options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    })
+        .AddMvc()
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        });
 
     // APPLICATION PIPELINE (MIDDLEWARE)
     var app = builder.Build();

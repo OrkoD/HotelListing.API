@@ -6,8 +6,15 @@
 # COUNTRIES ENDPOINTS
 ###############################################
 
-### 1. Get All Countries (Unpaginated list)
-GET {{HostAddress}}/api/countries
+### 1. Get All Countries (v1)
+GET {{HostAddress}}/api/v1/countries
+Accept: {{json}}
+Authorization: {{jwtToken}}
+
+###
+
+### 1b. Get All Countries (v2 - Demo Version)
+GET {{HostAddress}}/api/v2/countries
 Accept: {{json}}
 Authorization: {{jwtToken}}
 
