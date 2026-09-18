@@ -1,0 +1,23 @@
+@HostAddress = http://localhost:5268
+@json = application/json
+
+###############################################
+# HEALTH CHECK ENDPOINTS
+###############################################
+
+### 1. Detailed Health Check (Custom JSON report with all checks)
+GET {{HostAddress}}/health
+Accept: {{json}}
+
+###
+
+### 2. Liveness Probe (Kubernetes / Container alive check - no dependency checks)
+GET {{HostAddress}}/health/live
+Accept: {{json}}
+
+###
+
+### 3. Readiness Probe (Database & dependent subsystems ready check)
+GET {{HostAddress}}/health/ready
+Accept: {{json}}
+

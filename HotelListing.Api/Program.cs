@@ -17,8 +17,10 @@ using HotelListing.Api.Domain;
 using HotelListing.Api.Handlers;
 using Serilog;
 using Serilog.Events;
-using Serilog.Extensions.Hosting;
 using HotelListing.Api.Middleware;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -193,6 +195,10 @@ try
 
     builder.Services.AddOpenApi();
 
+    builder.Services.AddHealthChecks()
+        .AddCheck("self", () => HealthCheckResult.Healthy("Application is running"), tags: ["api"])
+        .AddDbContextCheck<HotelListingDbContext>("database", tags: ["db", "sql"]);
+
     // APPLICATION PIPELINE (MIDDLEWARE)
     var app = builder.Build();
 
@@ -208,6 +214,21 @@ try
     }
 
     app.UseHttpsRedirection();
+
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
+
+    app.MapHealthChecks("/health/live", new HealthCheckOptions
+    {
+        Predicate = _ => false
+    });
+
+    app.MapHealthChecks("/health/ready", new HealthCheckOptions
+    {
+        Predicate = check => check.Tags.Contains("db")
+    });
 
     // Authentication MUST precede Authorization and RateLimiter (to populate context.User)
     app.UseAuthentication();
