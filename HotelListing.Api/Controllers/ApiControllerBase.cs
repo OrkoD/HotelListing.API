@@ -38,6 +38,7 @@ public abstract class ApiControllerBase : ControllerBase
                 detail: errorDetails
             ),
             ErrorCodes.Validation => ValidationProblem(
+                statusCode: StatusCodes.Status400BadRequest,
                 title: "Validation failed",
                 detail: errorDetails
             ),
