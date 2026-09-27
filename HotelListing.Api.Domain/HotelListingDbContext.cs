@@ -17,6 +17,8 @@ public class HotelListingDbContext(DbContextOptions<HotelListingDbContext> optio
 
     public DbSet<Booking> Bookings { get; set; }
 
+    public DbSet<ImportJob> ImportJobs { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
