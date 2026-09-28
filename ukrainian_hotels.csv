@@ -1,0 +1,10 @@
+Name,Address,Rating,PerNightRate,Country
+Grand Hotel Lviv,"13, Svobody Avenue, Lviv",4.8,140.00,UA
+Fairmont Grand Hotel Kyiv,"1, Naberezhno-Khreshchatytska St, Kyiv",4.9,280.00,Ukraine
+Radisson Blu Resort Bukovel,"Shchyvky 220, Polianytsia, Bukovel",4.7,195.50,UA
+Bank Hotel Lviv,"8, Lystopadovoho Chynu St, Lviv",4.9,160.00,Ukraine
+Premier Palace Hotel Kyiv,"5-7/29, T. Shevchenka Blvd, Kyiv",4.6,210.00,UA
+Bristol Hotel Odesa,"15, Pushkinska St, Odesa",4.7,130.00,Ukraine
+Edem Resort Medical & Spa,"Strilky, Lviv Oblast",5.0,350.00,UA
+Invalid Hotel Rating,"10, Test St, Lviv",not_a_number,90.00,UA
+Invalid Hotel Country,"20, Test St, Kyiv",4.2,85.00,Atlantis

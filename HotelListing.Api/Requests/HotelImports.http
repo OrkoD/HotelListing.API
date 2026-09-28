@@ -1,0 +1,18 @@
+@HostAddress = http://localhost:5268
+@jwtToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNzk3NDYxNy1mYmUzLTQwY2YtYTIwOS04MjM1YmMwZGIyOTUiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwianRpIjoiODgxYTc1MWMtYWJmYi00ZmFlLTg0OTktMWI2ZDU1Nzk2MTQyIiwibmFtZSI6IkFkbWluIEFkbWluaXN0cmF0b3IiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImV4cCI6MTc5MDMzOTYxMCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.y41OhYpIj0F7FTZ2kwDCqwpXS-XktrDqjVeKYCPpn1s
+
+###############################################
+# BULK HOTEL IMPORT (multipart/form-data)
+###############################################
+
+### 1. Upload Ukrainian Hotels CSV
+POST {{HostAddress}}/api/HotelImports
+Authorization: {{jwtToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="ukrainian_hotels.csv"
+Content-Type: text/csv
+
+< ../../ukrainian_hotels.csv
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
