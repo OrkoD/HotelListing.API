@@ -20,7 +20,7 @@ public class HotelImportsController(IHotelImportService importService) : ApiCont
     [Authorize(Roles = RoleNames.Admin)]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<ImportJobSummaryDto>> ImportHotels(
-        [FromForm] IFormFile file,
+        IFormFile file,
         CancellationToken cancellationToken = default
     )
     {
