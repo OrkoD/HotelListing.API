@@ -201,8 +201,15 @@ try
 
     // 7. CONTROLLERS & API SPECIFICATION
     builder.Services.AddControllers()
-        .AddNewtonsoftJson()
-        .AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+        .AddNewtonsoftJson(opt =>
+        {
+            opt.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        })
+        .AddJsonOptions(opt =>
+        {
+            opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            opt.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        });
 
     builder.Services.AddOpenApi();
 
