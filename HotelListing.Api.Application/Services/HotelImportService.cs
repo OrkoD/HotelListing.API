@@ -4,14 +4,14 @@ using HotelListing.Api.Common.Results;
 using HotelListing.Api.Domain;
 using HotelListing.Api.Common.Constants;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Text.Json;
 
 namespace HotelListing.Api.Application.Services;
 
 public class HotelImportService(
     HotelListingDbContext db,
-    IHotelDataParserFactory parserFactory
+    IHotelDataParserFactory parserFactory,
+    IFileStorageService fileStorageService
 ) : IHotelImportService
 {
     public async Task<Result<ImportJobSummaryDto>> ImportHotelsAsync(
@@ -29,11 +29,13 @@ public class HotelImportService(
                 new Error(ErrorCodes.Validation, $"Unsupported file format for '{originalFileName}'. Supported formats: .csv, .json, .pdf")
             );
 
+        var storedFileUri = await fileStorageService.UploadAsync(fileStream, originalFileName, contentType, cancellationToken);
+
         // 2. Initialize Audit Job entity in SQL DB
         var job = new ImportJob
         {
             OriginalFileName = originalFileName,
-            StoredFileUri = "local-temp",
+            StoredFileUri = storedFileUri,
             ContentType = contentType,
             FileExtension = Path.GetExtension(originalFileName).ToLowerInvariant(),
             FileSizeBytes = fileSizeBytes,
@@ -52,12 +54,15 @@ public class HotelImportService(
             (Key: c.ShortName, Value: c.CountryId)
         }).ToDictionary(c => c.Key, c => c.Value, StringComparer.OrdinalIgnoreCase);
 
-        // 4. Stream and process rows
-        var hotelsToInsert = new List<Hotel>();
+        // 4. PHASE 1: Stream and validate rows from storage
+        var validRows = new List<(HotelImportRowDto Row, int CountryId)>();
+        var seenInBatch = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var errors = new List<string>();
         var totalRows = 0;
 
-        await foreach (var rowResult in parser.ParseAsync(fileStream, cancellationToken))
+        await using var readStream = await fileStorageService.OpenReadStreamAsync(storedFileUri, cancellationToken);
+
+        await foreach (var rowResult in parser.ParseAsync(readStream, cancellationToken))
         {
             totalRows++;
 
@@ -77,29 +82,30 @@ public class HotelImportService(
                 continue;
             }
 
-            hotelsToInsert.Add(new Hotel
+            // Guard against duplicate hotel rows in the SAME file
+            var hotelKey = BuildHotelKey(row.Name, countryId);
+            if (!seenInBatch.Add(hotelKey))
             {
-                Name = row.Name,
-                Address = row.Address,
-                Rating = row.Rating,
-                PerNightRate = row.PerNightRate,
-                CountryId = countryId
-            });
+                errors.Add($"Row {row.RowNumber}: Duplicate hotel '{row.Name}' found within the same file.");
+                continue;
+            }
+
+            validRows.Add((row, countryId));
         }
 
-        // 5. Bulk insert all valid hotels
-        if (hotelsToInsert.Count > 0)
+        // 5. PHASE 2: Batch-scoped DB query and Upsert
+        if (validRows.Count > 0)
         {
-            db.Hotels.AddRange(hotelsToInsert);
+            await UpsertHotelsAsync(validRows, cancellationToken);
         }
 
         // 6. Finalize the Audit Job record
         job.TotalRecords = totalRows;
-        job.SuccessfulRecords = hotelsToInsert.Count;
+        job.SuccessfulRecords = validRows.Count;
         job.FailedRecords = errors.Count;
         job.CompletedAtUtc = DateTime.UtcNow;
 
-        job.Status = (errors.Count, hotelsToInsert.Count) switch
+        job.Status = (errors.Count, validRows.Count) switch
         {
             (0, > 0) => ImportStatus.Completed,
             ( > 0, > 0) => ImportStatus.PartiallyCompleted,
@@ -126,4 +132,43 @@ public class HotelImportService(
 
         return Result<ImportJobSummaryDto>.Success(summary);
     }
+
+    private async Task UpsertHotelsAsync(
+        List<(HotelImportRowDto Row, int CountryId)> validRows,
+        CancellationToken cancellationToken)
+    {
+        var hotelNames = validRows.Select(r => r.Row.Name).Distinct().ToList();
+        var existingHotels = await db.Hotels
+            .Where(h => hotelNames.Contains(h.Name))
+            .ToListAsync(cancellationToken);
+        var existingHotelLookup = existingHotels.ToDictionary(
+            h => BuildHotelKey(h.Name, h.CountryId),
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        foreach (var (row, countryId) in validRows)
+        {
+            var key = BuildHotelKey(row.Name, countryId);
+            if (existingHotelLookup.TryGetValue(key, out var existingHotel))
+            {
+                existingHotel.Address = row.Address;
+                existingHotel.Rating = row.Rating;
+                existingHotel.PerNightRate = row.PerNightRate;
+            }
+            else
+            {
+                db.Hotels.Add(new Hotel
+                {
+                    Name = row.Name,
+                    Address = row.Address,
+                    Rating = row.Rating,
+                    PerNightRate = row.PerNightRate,
+                    CountryId = countryId
+                });
+            }
+        }
+    }
+
+    private static string BuildHotelKey(string name, int countryId) =>
+        $"{name.Trim().ToLowerInvariant()}|{countryId}";
 }

@@ -28,6 +28,7 @@ using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.DependencyInjection;
 using HotelListing.Api.Application.Services.Parsers;
+using HotelListing.Api.Services;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -120,11 +121,11 @@ try
     builder.Services.AddScoped<IBookingService, BookingService>();
     builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-    builder.Services.AddProblemDetails();
-
     builder.Services.AddScoped<IHotelDataParser, CsvHotelParser>();
     builder.Services.AddScoped<IHotelDataParserFactory, HotelDataParserFactory>();
     builder.Services.AddScoped<IHotelImportService, HotelImportService>();
+    builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+    builder.Services.AddProblemDetails();
 
     // 5. CACHING STRATEGY
     builder.Services.AddOutputCache(options =>
