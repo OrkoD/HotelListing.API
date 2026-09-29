@@ -29,6 +29,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.DependencyInjection;
 using HotelListing.Api.Application.Services.Parsers;
 using HotelListing.Api.Services;
+using HotelListing.Api.Conventions;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -201,7 +202,7 @@ try
     });
 
     // 7. CONTROLLERS & API SPECIFICATION
-    builder.Services.AddControllers()
+    builder.Services.AddControllers(options => options.Conventions.Add(new ApiControllerBaseConvention()))
         .AddNewtonsoftJson(opt =>
         {
             opt.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());

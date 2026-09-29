@@ -106,11 +106,6 @@ public class CountriesController(ICountriesService countriesService) : ApiContro
     /// <response code="404">If the country does not exist.</response>
     [HttpPut("{id:int}")]
     [Authorize(Roles = RoleNames.Admin)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateCountry(int id, UpdateCountryDto country) =>
         ToActionResult(await countriesService.UpdateCountryAsync(id, country));
 
