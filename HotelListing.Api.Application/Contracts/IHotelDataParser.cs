@@ -11,6 +11,9 @@ public interface IHotelDataParser
     /// <summary>The file format this strategy is responsible for.</summary>
     SupportedImportFormat Format { get; }
 
+    /// <summary>The file extension this parser handles (e.g. ".csv").</summary>
+    string SupportedExtension { get; }
+
     /// <summary>
     /// Streams parsed rows asynchronously from a file stream.
     /// Each row is wrapped in a Result to support partial successes.

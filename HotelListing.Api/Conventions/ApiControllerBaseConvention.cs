@@ -1,10 +1,10 @@
 using HotelListing.Api.Controllers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace HotelListing.Api.Conventions;
 
@@ -25,7 +25,6 @@ public class ApiControllerBaseConvention : IActionModelConvention
         if (httpMethods.Count == 0)
         {
             var methodAttributes = action.Attributes.OfType<HttpMethodAttribute>().SelectMany(a => a.HttpMethods);
-
             foreach (var method in methodAttributes)
                 httpMethods.Add(method);
         }
@@ -40,22 +39,39 @@ public class ApiControllerBaseConvention : IActionModelConvention
         );
         var hasParameters = action.Parameters.Count > 0;
 
-        // 4. Global 500
+        // 4. Success Response (200 OK with T, or 204 NoContent for void/IActionResult)
+        var returnType = action.ActionMethod.ReturnType;
+        if (returnType.IsGenericType && (returnType.GetGenericTypeDefinition() == typeof(Task<>) || returnType.GetGenericTypeDefinition() == typeof(ValueTask<>)))
+        {
+            returnType = returnType.GetGenericArguments()[0];
+        }
+
+        if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(ActionResult<>))
+        {
+            var successDtoType = returnType.GetGenericArguments()[0];
+            AddFilterIfNotExists(action, successDtoType, StatusCodes.Status200OK);
+        }
+        else if (returnType == typeof(IActionResult) || returnType == typeof(ActionResult))
+        {
+            AddFilterIfNotExists(action, null, StatusCodes.Status204NoContent);
+        }
+
+        // 5. Global 500
         AddFilterIfNotExists(action, typeof(ProblemDetails), StatusCodes.Status500InternalServerError);
 
-        // 5. 400 Bad Request / ValidationProblemDetails (applies to mutations or actions taking parameters)
+        // 6. 400 Bad Request / ValidationProblemDetails (applies to mutations or actions taking parameters)
         if (hasParameters || isMutating)
             AddFilterIfNotExists(action, typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest);
 
-        // 6. 404 Not Found (ONLY for route-identified resources, never generic query-filtered lists)
+        // 7. 404 Not Found (ONLY for route-identified resources, never generic query-filtered lists)
         if (hasRouteParameter && isLookupOrDelete)
             AddFilterIfNotExists(action, typeof(ProblemDetails), StatusCodes.Status404NotFound);
 
-        // 7. 409 Conflict (only for state mutations)
+        // 8. 409 Conflict (only for state mutations)
         if (isMutating)
             AddFilterIfNotExists(action, typeof(ProblemDetails), StatusCodes.Status409Conflict);
 
-        // 8. 401 & 403 Authentication / Authorization
+        // 9. 401 & 403 Authentication / Authorization
         var isAnonymous = action.Attributes.OfType<AllowAnonymousAttribute>().Any();
         var isAuthorized = !isAnonymous && (
             action.Attributes.OfType<AuthorizeAttribute>().Any() ||
@@ -80,3 +96,4 @@ public class ApiControllerBaseConvention : IActionModelConvention
         action.Filters.Add(filter);
     }
 }
+

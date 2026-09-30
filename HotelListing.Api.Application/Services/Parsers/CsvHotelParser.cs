@@ -16,6 +16,8 @@ public sealed class CsvHotelParser : IHotelDataParser
 {
     public SupportedImportFormat Format => SupportedImportFormat.Csv;
 
+    public string SupportedExtension => ".csv";
+
     private const int ExpectedColumnCount = 5;
 
     private static readonly CsvConfiguration CsvConfig = new(CultureInfo.InvariantCulture)
