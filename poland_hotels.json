@@ -1,0 +1,23 @@
+[
+  {
+    "name": "InterContinental Warsaw",
+    "address": "Emilii Plater 49, Warsaw",
+    "rating": 4.8,
+    "perNightRate": 195.00,
+    "country": "Poland"
+  },
+  {
+    "name": "Sofitel Warsaw Victoria",
+    "address": "Krolewska 11, Warsaw",
+    "rating": 4.7,
+    "perNightRate": 160.50,
+    "countryIdentifier": "PL"
+  },
+  {
+    "name": "H15 Boutique Hotel",
+    "address": "Poznanska 15, Warsaw",
+    "rating": 4.9,
+    "perNightRate": 220.00,
+    "country": "Poland"
+  }
+]

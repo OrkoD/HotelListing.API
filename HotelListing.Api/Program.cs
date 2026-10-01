@@ -124,6 +124,7 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddScoped<IHotelDataParser, CsvHotelParser>();
     builder.Services.AddScoped<IHotelDataParser, PdfHotelParser>();
+    builder.Services.AddScoped<IHotelDataParser, JsonHotelParser>();
     builder.Services.AddScoped<IHotelDataParserFactory, HotelDataParserFactory>();
     builder.Services.AddScoped<IHotelImportService, HotelImportService>();
     builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();

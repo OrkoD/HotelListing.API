@@ -84,7 +84,7 @@ public class AzureBlobStorageService : IFileStorageService
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();
         var safeFileName = Path.GetFileNameWithoutExtension(fileName);
-        var datePrefix = DateTime.UtcNow.ToString("yyyy/MM");
+        var datePrefix = DateTime.UtcNow.ToString("yyyy/MM", System.Globalization.CultureInfo.InvariantCulture);
 
         return $"{datePrefix}/{Guid.NewGuid():N}_{safeFileName}{extension}";
     }

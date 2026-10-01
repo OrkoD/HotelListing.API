@@ -16,3 +16,28 @@ Content-Type: text/csv
 
 < ../../ukrainian_hotels.csv
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 2. Upload Polish Hotels PDF
+POST {{HostAddress}}/api/HotelImports
+Authorization: {{jwtToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="poland_hotels.pdf"
+Content-Type: application/pdf
+
+< ../../poland_hotels.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 3. Upload Polish Hotels JSON
+POST {{HostAddress}}/api/HotelImports
+Authorization: {{jwtToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="poland_hotels.json"
+Content-Type: application/json
+
+< ../../poland_hotels.json
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
