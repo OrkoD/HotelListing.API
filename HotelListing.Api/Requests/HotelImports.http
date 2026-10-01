@@ -14,7 +14,7 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 Content-Disposition: form-data; name="file"; filename="ukrainian_hotels.csv"
 Content-Type: text/csv
 
-< ../../ukrainian_hotels.csv
+< ../Fixtures/ukrainian_hotels.csv
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### 2. Upload Polish Hotels PDF
@@ -26,7 +26,7 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 Content-Disposition: form-data; name="file"; filename="poland_hotels.pdf"
 Content-Type: application/pdf
 
-< ../../poland_hotels.pdf
+< ../Fixtures/poland_hotels.pdf
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### 3. Upload Polish Hotels JSON
@@ -38,6 +38,6 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 Content-Disposition: form-data; name="file"; filename="poland_hotels.json"
 Content-Type: application/json
 
-< ../../poland_hotels.json
+< ../Fixtures/poland_hotels.json
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
