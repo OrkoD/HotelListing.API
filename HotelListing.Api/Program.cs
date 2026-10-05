@@ -114,21 +114,12 @@ try
 
     // 4. APPLICATION & INFRASTRUCTURE SERVICES
     builder.Services.AddHttpContextAccessor();
-    builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(HotelMappingProfile).Assembly));
-
-    builder.Services.AddScoped<ICountriesService, CountriesService>();
-    builder.Services.AddScoped<IHotelsService, HotelsService>();
-    builder.Services.AddScoped<IUsersService, UsersService>();
-    builder.Services.AddScoped<IBookingService, BookingService>();
-    builder.Services.AddScoped<IApiKeyValidatorService, ApiKeyValidatorService>();
-    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-    builder.Services.AddScoped<IHotelDataParser, CsvHotelParser>();
-    builder.Services.AddScoped<IHotelDataParser, PdfHotelParser>();
-    builder.Services.AddScoped<IHotelDataParser, JsonHotelParser>();
-    builder.Services.AddScoped<IHotelDataParserFactory, HotelDataParserFactory>();
-    builder.Services.AddScoped<IHotelImportService, HotelImportService>();
-    builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
     builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+
+    // Register all Application Layer dependencies in one clean call
+    builder.Services.AddApplicationServices();
 
     // 5. CACHING STRATEGY
     builder.Services.AddOutputCache(options =>
